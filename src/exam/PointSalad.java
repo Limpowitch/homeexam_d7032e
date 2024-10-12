@@ -5,6 +5,10 @@ import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import player.Bot;
+import player.Human;
+import player.IPlayer;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,48 +18,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class PointSalad {
-	public ArrayList<Player> players = new ArrayList<>();
+import score.VegetableScoreCalculator;
+import score.IScoreCalculator;
+import score.IVegetableCounter;
+
+public class PointSalad implements IVegetableCounter{
+	public ArrayList<IPlayer> players = new ArrayList<>();
 	public ArrayList<Pile> piles = new ArrayList<>();
     public ServerSocket aSocket;
 
-	class Player {
-		public int playerID;
-		public boolean online;
-		public boolean isBot;
-		public Socket connection;
-		public ObjectInputStream inFromClient;
-		public ObjectOutputStream outToClient;
-		public ArrayList<String> region = new ArrayList<String>();
-		Scanner in = new Scanner(System.in);
-		public ArrayList<Card> hand = new ArrayList<Card>();
-		public int score = 0;
-
-
-
-		public Player(int playerID, boolean isBot, Socket connection, ObjectInputStream inFromClient, ObjectOutputStream outToClient) {
-			this.playerID = playerID; this.connection = connection; this.inFromClient = inFromClient; this.outToClient = outToClient; this.isBot = isBot;
-			if(connection == null)
-				this.online = false;
-			else
-				this.online = true;
-		}
-		public void sendMessage(Object message) {
-			if(online) {
-				try {outToClient.writeObject(message);} catch (Exception e) {}
-			} else if(!isBot){
-				System.out.println(message);                
-			}
-		}
-		public String readMessage() {
-			String word = ""; 
-			if(online)
-				try{word = (String) inFromClient.readObject();} catch (Exception e){}
-			else
-				try {word=in.nextLine();} catch(Exception e){}
-			return word;
-		}
-	}
+	
 
 	public class Pile {
 		public ArrayList<Card> cards = new ArrayList<Card>();
@@ -242,169 +214,6 @@ public class PointSalad {
 		piles.add(new Pile(pile3));
     }
 
-	public int calculateScore(ArrayList<Card> hand, Player thisPlayer) {
-		//System.out.println("DEBUG: \n" + displayHand(hand));
-		int totalScore = 0;
-
-		for (Card criteriaCard : hand) {
-			if (criteriaCard.criteriaSideUp) {
-				String criteria = criteriaCard.criteria;
-				String[] parts = criteria.split(",");
-
-				//ID 18
-				if(criteria.indexOf("TOTAL") >= 0 || criteria.indexOf("TYPE") >= 0 || criteria.indexOf("SET") >= 0) {
-					if(criteria.indexOf("TOTAL")>=0) {
-						int countVeg = countTotalVegetables(hand);
-						int thisHandCount = countVeg;
-						for(Player p : players) {
-							if(p.playerID != thisPlayer.playerID) {
-								int playerVeg = countTotalVegetables(p.hand);
-								if((criteria.indexOf("MOST")>=0) && (playerVeg > countVeg)) {
-									countVeg = countTotalVegetables(p.hand);
-								}
-								if((criteria.indexOf("FEWEST")>=0) && (playerVeg < countVeg)) {
-									countVeg = countTotalVegetables(p.hand);
-								}
-							}
-						}
-						if(countVeg == thisHandCount) {
-							//int aScore = Integer.parseInt(criteria.substring(criteria.indexOf("=")+1).trim());
-							//System.out.print("ID18 MOST/FEWEST: "+aScore + " " );
-							totalScore += Integer.parseInt(criteria.substring(criteria.indexOf("=")+1).trim());
-						}
-					}
-					if(criteria.indexOf("TYPE")>=0) {
-						String[] expr = criteria.split("/");
-						int addScore = Integer.parseInt(expr[0].trim());
-						if(expr[1].indexOf("MISSING")>=0) {
-							int missing = 0;
-							for (Card.Vegetable vegetable : Card.Vegetable.values()) {
-								if(countVegetables(hand, vegetable) == 0) {
-									missing++;
-								}
-							}
-							//int aScore = missing * addScore;
-							//System.out.print("ID18 TYPE MISSING: "+aScore + " ");
-							totalScore += missing * addScore;
-						}
-						else {
-							int atLeastPerVegType = Integer.parseInt(expr[1].substring(expr[1].indexOf(">=")+2).trim());
-							int totalType = 0;
-							for(Card.Vegetable vegetable : Card.Vegetable.values()) {
-								int countVeg = countVegetables(hand, vegetable);
-								if(countVeg >= atLeastPerVegType) {
-									totalType++;
-								}
-							}
-							//int aScore = totalType * addScore;
-							//System.out.print("ID18 TYPE >=: "+aScore + " ");
-							totalScore += totalType * addScore;
-						}
-					}
-					if(criteria.indexOf("SET")>=0) {
-						int addScore = 12;
-						for (Card.Vegetable vegetable : Card.Vegetable.values()) {
-							int countVeg = countVegetables(hand, vegetable);
-							if(countVeg == 0) {
-								addScore = 0;
-								break;
-							}
-						}
-						//System.out.print("ID18 SET: "+addScore + " ");
-						totalScore += addScore;
-					}
-				}
-				//ID1 and ID2
-				else if((criteria.indexOf("MOST")>=0) || (criteria.indexOf("FEWEST")>=0)) { //ID1, ID2
-					int vegIndex = criteria.indexOf("MOST")>=0 ? criteria.indexOf("MOST")+5 : criteria.indexOf("FEWEST")+7;
-					String veg = criteria.substring(vegIndex, criteria.indexOf("=")).trim();
-					int countVeg = countVegetables(hand, Card.Vegetable.valueOf(veg));
-					int nrVeg = countVeg;
-					for(Player p : players) {
-						if(p.playerID != thisPlayer.playerID) {
-							int playerVeg = countVegetables(p.hand, Card.Vegetable.valueOf(veg));
-							if((criteria.indexOf("MOST")>=0) && (playerVeg > nrVeg)) {
-								nrVeg = countVegetables(p.hand, Card.Vegetable.valueOf(veg));
-							}
-							if((criteria.indexOf("FEWEST")>=0) && (playerVeg < nrVeg)) {
-								nrVeg = countVegetables(p.hand, Card.Vegetable.valueOf(veg));
-							}
-						}
-					}
-					if(nrVeg == countVeg) {
-						//System.out.print("ID1/ID2: "+Integer.parseInt(criteria.substring(criteria.indexOf("=")+1).trim()) + " ");
-						totalScore += Integer.parseInt(criteria.substring(criteria.indexOf("=")+1).trim());
-					}
-				}
-			
-				//ID3, ID4, ID5, ID6, ID7, ID8, ID9, ID10, ID11, ID12, ID13, ID14, ID15, ID16, ID17
-				else if(parts.length > 1 || criteria.indexOf("+")>=0 || parts[0].indexOf("/")>=0) {
-					if(criteria.indexOf("+")>=0) { //ID5, ID6, ID7, ID11, ID12, ID13
-						String expr = criteria.split("=")[0].trim();
-						String[] vegs = expr.split("\\+");
-						int[] nrVeg = new int[vegs.length];
-						int countSameKind = 1;
-						for(int j = 1; j < vegs.length; j++) {
-							if(vegs[0].trim().equals(vegs[j].trim())) {
-								countSameKind++;
-							}
-						}
-						if(countSameKind > 1) {
-							//System.out.print("ID5/ID11: "+ ((int)countVegetables(hand, Card.Vegetable.valueOf(vegs[0].trim()))/countSameKind) * Integer.parseInt(criteria.split("=")[1].trim()) + " ");
-							totalScore +=  ((int)countVegetables(hand, Card.Vegetable.valueOf(vegs[0].trim()))/countSameKind) * Integer.parseInt(criteria.split("=")[1].trim());
-						} else {
-							for(int i = 0; i < vegs.length; i++) {
-								nrVeg[i] = countVegetables(hand, Card.Vegetable.valueOf(vegs[i].trim()));
-							}
-							//find the lowest number in the nrVeg array
-							int min = nrVeg[0];
-							for (int x = 1; x < nrVeg.length; x++) {
-								if (nrVeg[x] < min) {
-									min = nrVeg[x];
-								}
-							}
-							//System.out.print("ID6/ID7/ID12/ID13: "+min * Integer.parseInt(criteria.split("=")[1].trim()) + " ");
-							totalScore += min * Integer.parseInt(criteria.split("=")[1].trim());
-						}
-					}
-					else if(parts[0].indexOf("=")>=0) { //ID3
-						String veg = parts[0].substring(0, parts[0].indexOf(":"));
-						int countVeg = countVegetables(hand, Card.Vegetable.valueOf(veg));
-						//System.out.print("ID3: "+((countVeg%2==0)?7:3) + " ");
-						totalScore += (countVeg%2==0)?7:3;
-					}
-					else { //ID4, ID8, ID9, ID10, ID14, ID15, ID16, ID17
-						for(int i = 0; i < parts.length; i++) {
-							String[] veg = parts[i].split("/");
-							//System.out.print("ID4/ID8/ID9/ID10/ID14/ID15/ID16/ID17: " + Integer.parseInt(veg[0].trim()) * countVegetables(hand, Card.Vegetable.valueOf(veg[1].trim())) + " ");
-							totalScore += Integer.parseInt(veg[0].trim()) * countVegetables(hand, Card.Vegetable.valueOf(veg[1].trim()));
-						}
-					}
-				}
-			}
-		}
-		return totalScore;
-	}
-
-	private int countVegetables(ArrayList<Card> hand, Card.Vegetable vegetable) {
-		int count = 0;
-		for (Card card : hand) {
-			if (!card.criteriaSideUp && card.vegetable == vegetable) {
-				count++;
-			}
-		}
-		return count;
-	}
-
-	private int countTotalVegetables(ArrayList<Card> hand) {
-		int count = 0;
-		for (Card card : hand) {
-			if (!card.criteriaSideUp) {
-				count++;
-			}
-		}
-		return count;
-	}
 
 	public void shuffleDeck(ArrayList<Card> deck) {
 		Collections.shuffle(deck);
@@ -429,9 +238,29 @@ public class PointSalad {
 	}
 
 	private void sendToAllPlayers(String message) {
-		for(Player player : players) {
+		for(IPlayer player : players) {
 			player.sendMessage(message);
 		}
+	}
+	
+	public int countVegetables(ArrayList<Card> hand, Card.Vegetable vegetable) {
+		int count = 0;
+		for (Card card : hand) {
+			if (!card.criteriaSideUp && card.vegetable == vegetable) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	public int countTotalVegetables(ArrayList<Card> hand) {
+		int count = 0;
+		for (Card card : hand) {
+			if (!card.criteriaSideUp) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	public void client(String ipAddress) throws Exception {
@@ -451,10 +280,10 @@ public class PointSalad {
     }
 
     public void server(int numberPlayers, int numberOfBots) throws Exception {
-        players.add(new Player(0, false, null, null, null)); //add this instance as a player
+        players.add(new Human(0, null, null, null, false)); //add this instance as a player
         //Open for connections if there are online players
         for(int i=0; i<numberOfBots; i++) {
-            players.add(new Player(i+1, true, null, null, null)); //add a bot    
+            players.add(new Bot(i+1, null, null, null, true)); //add a bot    
         }
         if(numberPlayers>1)
             aSocket = new ServerSocket(2048);
@@ -462,7 +291,7 @@ public class PointSalad {
             Socket connectionSocket = aSocket.accept();
             ObjectInputStream inFromClient = new ObjectInputStream(connectionSocket.getInputStream());
             ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
-            players.add(new Player(i, false, connectionSocket, inFromClient, outToClient)); //add an online client
+            players.add(new Human(i, connectionSocket, inFromClient, outToClient, false)); //add an online client
             System.out.println("Connected to player " + i);
             outToClient.writeObject("You connected to the server as player " + i + "\n");
         }    
@@ -495,6 +324,9 @@ public class PointSalad {
 	public PointSalad(String[] args) {
 		int numberPlayers = 0;
 		int numberOfBots = 0;
+		
+		IScoreCalculator scoreCalculator = new VegetableScoreCalculator(this);
+		
 		if(args.length == 0) {
 			System.out.println("Please enter the number of players (1-6): ");
 			Scanner in = new Scanner(System.in);
@@ -517,6 +349,8 @@ public class PointSalad {
 			}
 		}
 
+		
+
 		setPiles(numberPlayers+numberOfBots);
 
 		try {
@@ -530,7 +364,7 @@ public class PointSalad {
 		boolean keepPlaying = true;
 
 		while(keepPlaying) {
-			Player thisPlayer = players.get(currentPlayer);
+			IPlayer thisPlayer = players.get(currentPlayer);
 			boolean stillAvailableCards = false;
 			for(Pile p: piles) {
 				if(!p.isEmpty()) {
@@ -542,9 +376,9 @@ public class PointSalad {
 				keepPlaying = false;
 				break;
 			}
-			if(!thisPlayer.isBot) {
+			if(!thisPlayer.isBot()) {
 				thisPlayer.sendMessage("\n\n****************************************************************\nIt's your turn! Your hand is:\n");
-				thisPlayer.sendMessage(displayHand(thisPlayer.hand));
+				thisPlayer.sendMessage(displayHand(thisPlayer.getHand()));
 				thisPlayer.sendMessage("\nThe piles are: ");
 			
 				thisPlayer.sendMessage(printMarket());
@@ -558,7 +392,7 @@ public class PointSalad {
 							thisPlayer.sendMessage("\nThis pile is empty. Please choose another pile.\n");
 							continue;
 						} else {
-							thisPlayer.hand.add(piles.get(pileIndex).buyPointCard());
+							thisPlayer.getHand().add(piles.get(pileIndex).buyPointCard());
 							thisPlayer.sendMessage("\nYou took a card from pile " + (pileIndex) + " and added it to your hand.\n");
 							validChoice = true;
 						}
@@ -582,7 +416,7 @@ public class PointSalad {
 									validChoice = true;
 									break;
 								} else {
-									thisPlayer.hand.add(piles.get(pileIndex).buyVeggieCard(veggieIndex));
+									thisPlayer.getHand().add(piles.get(pileIndex).buyVeggieCard(veggieIndex));
 									takenVeggies++;
 									//thisPlayer.sendMessage("\nYou took a card from pile " + (pileIndex) + " and added it to your hand.\n");
 									validChoice = true;
@@ -594,7 +428,7 @@ public class PointSalad {
 				}
 				//Check if the player has any criteria cards in their hand
 				boolean criteriaCardInHand = false;
-				for(Card card : thisPlayer.hand) {
+				for(Card card : thisPlayer.getHand()) {
 					if(card.criteriaSideUp) {
 						criteriaCardInHand = true;
 						break;
@@ -602,15 +436,15 @@ public class PointSalad {
 				}
 				if(criteriaCardInHand) {
 					//Give the player an option to turn a criteria card into a veggie card
-					thisPlayer.sendMessage("\n"+displayHand(thisPlayer.hand)+"\nWould you like to turn a criteria card into a veggie card? (Syntax example: n or 2)");
+					thisPlayer.sendMessage("\n"+displayHand(thisPlayer.getHand())+"\nWould you like to turn a criteria card into a veggie card? (Syntax example: n or 2)");
 					String choice = thisPlayer.readMessage();
 					if(choice.matches("\\d")) {
 						int cardIndex = Integer.parseInt(choice);
-						thisPlayer.hand.get(cardIndex).criteriaSideUp = false;
+						thisPlayer.getHand().get(cardIndex).criteriaSideUp = false;
 					}
 				}
 				thisPlayer.sendMessage("\nYour turn is completed\n****************************************************************\n\n");
-				sendToAllPlayers("Player " + thisPlayer.playerID + "'s hand is now: \n"+displayHand(thisPlayer.hand)+"\n");	
+				sendToAllPlayers("Player " + thisPlayer.getPlayerID() + "'s hand is now: \n"+displayHand(thisPlayer.getHand())+"\n");	
 
 			} else {
 				// Bot logic
@@ -628,11 +462,11 @@ public class PointSalad {
 					for(int i = 0; i < piles.size(); i++) {
 						if(piles.get(i).getPointCard() != null) {
 							ArrayList<Card> tempHand = new ArrayList<Card>();
-							for(Card handCard : thisPlayer.hand) {
+							for(Card handCard : thisPlayer.getHand()) {
 								tempHand.add(handCard);
 							}
 							tempHand.add(piles.get(i).getPointCard());
-							int score = calculateScore(tempHand, thisPlayer);
+							int score = scoreCalculator.calculateScore(tempHand, thisPlayer, players);
 							if(score > highestPointCardScore) {
 								highestPointCardScore = score;
 								highestPointCardIndex = i;
@@ -640,7 +474,7 @@ public class PointSalad {
 						}
 					}
 					if(piles.get(highestPointCardIndex).getPointCard() != null) {
-						thisPlayer.hand.add(piles.get(highestPointCardIndex).buyPointCard());
+						thisPlayer.getHand().add(piles.get(highestPointCardIndex).buyPointCard());
 					} else {
 						choice = 1; //buy veggies instead
 						emptyPiles = true;
@@ -650,11 +484,11 @@ public class PointSalad {
 					int cardsPicked = 0;
 					for(Pile pile : piles) {
 						if(pile.veggieCards[0] != null && cardsPicked < 2) {
-							thisPlayer.hand.add(pile.buyVeggieCard(0));
+							thisPlayer.getHand().add(pile.buyVeggieCard(0));
 							cardsPicked++;
 						}
 						if(pile.veggieCards[1] != null && cardsPicked < 2) {
-							thisPlayer.hand.add(pile.buyVeggieCard(1));
+							thisPlayer.getHand().add(pile.buyVeggieCard(1));
 							cardsPicked++;
 						}
 					}
@@ -665,11 +499,11 @@ public class PointSalad {
 						for(int i = 0; i < piles.size(); i++) {
 							if(piles.get(i).getPointCard() != null && piles.get(i).getPointCard().criteriaSideUp) {
 								ArrayList<Card> tempHand = new ArrayList<Card>();
-								for(Card handCard : thisPlayer.hand) {
+								for(Card handCard : thisPlayer.getHand()) {
 									tempHand.add(handCard);
 								}
 								tempHand.add(piles.get(i).getPointCard());
-								int score = calculateScore(tempHand, thisPlayer);
+								int score = scoreCalculator.calculateScore(tempHand, thisPlayer, players);
 								if(score > highestPointCardScore) {
 									highestPointCardScore = score;
 									highestPointCardIndex = i;
@@ -677,11 +511,11 @@ public class PointSalad {
 							}
 						}
 						if(piles.get(highestPointCardIndex).getPointCard() != null) {
-							thisPlayer.hand.add(piles.get(highestPointCardIndex).buyPointCard());
+							thisPlayer.getHand().add(piles.get(highestPointCardIndex).buyPointCard());
 						}
 					}
 				}
-				sendToAllPlayers("Bot " + thisPlayer.playerID + "'s hand is now: \n"+displayHand(thisPlayer.hand)+"\n");
+				sendToAllPlayers("Bot " + thisPlayer.getPlayerID() + "'s hand is now: \n"+displayHand(thisPlayer.getHand())+"\n");
 			}
 			
 			if(currentPlayer == players.size()-1) {
@@ -691,22 +525,22 @@ public class PointSalad {
 			}
 		}
 		sendToAllPlayers(("\n-------------------------------------- CALCULATING SCORES --------------------------------------\n"));
-		for(Player player : players) {
-			sendToAllPlayers("Player " + player.playerID + "'s hand is: \n"+displayHand(player.hand));
-			player.score = calculateScore(player.hand, player);
-			sendToAllPlayers("\nPlayer " + player.playerID + "'s score is: " + player.score);
+		for(IPlayer player : players) {
+			sendToAllPlayers("Player " + player.getPlayerID() + "'s hand is: \n"+displayHand(player.getHand()));
+			player.setScore(scoreCalculator.calculateScore(player.getHand(), player, players)); 
+			sendToAllPlayers("\nPlayer " + player.getPlayerID() + "'s score is: " + player.getScore());
 		}
 
 		int maxScore = 0;
 		int playerID = 0;
-		for(Player player : players) {
-			if(player.score > maxScore) {
-				maxScore = player.score;
-				playerID = player.playerID;
+		for(IPlayer player : players) {
+			if(player.getScore() > maxScore) {
+				maxScore = player.getScore();
+				playerID = player.getPlayerID();
 			}
 		}
-		for(Player player : players) {
-			if(player.playerID == playerID) {
+		for(IPlayer player : players) {
+			if(player.getPlayerID() == playerID) {
 				player.sendMessage("\nCongratulations! You are the winner with a score of " + maxScore);
 			} else {
 				player.sendMessage("\nThe winner is player " + playerID + " with a score of " + maxScore);
