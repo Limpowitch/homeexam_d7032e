@@ -24,53 +24,15 @@ import pile.*;
 import card.*;
 import counter.*;
 import view.*;
+import network.*;
 
 
 public class PointSalad{
 	public ArrayList<IPlayer> players = new ArrayList<>();
 	public ArrayList<IPile> piles = new ArrayList<>();
     public ServerSocket aSocket;
-
-
-	private void sendToAllPlayers(String message) {
-		for(IPlayer player : players) {
-			player.sendMessage(message);
-		}
-	}
-
-	public void client(String ipAddress) throws Exception {
-        //Connect to server
-        Socket aSocket = new Socket(ipAddress, 2048);
-        ObjectOutputStream outToServer = new ObjectOutputStream(aSocket.getOutputStream());
-        ObjectInputStream inFromServer = new ObjectInputStream(aSocket.getInputStream());
-        String nextMessage = "";
-        while(!nextMessage.contains("winner")){
-            nextMessage = (String) inFromServer.readObject();
-            System.out.println(nextMessage);
-            if(nextMessage.contains("Take") || nextMessage.contains("into")) {
-                Scanner in = new Scanner(System.in);
-                outToServer.writeObject(in.nextLine());
-            } 
-        }
-    }
-
-    public void server(int numberPlayers, int numberOfBots) throws Exception {
-        players.add(new Human(0, null, null, null, false)); //add this instance as a player
-        //Open for connections if there are online players
-        for(int i=0; i<numberOfBots; i++) {
-            players.add(new Bot(i+1, null, null, null, true)); //add a bot    
-        }
-        if(numberPlayers>1)
-            aSocket = new ServerSocket(2048);
-        for(int i=numberOfBots+1; i<numberPlayers+numberOfBots; i++) {
-            Socket connectionSocket = aSocket.accept();
-            ObjectInputStream inFromClient = new ObjectInputStream(connectionSocket.getInputStream());
-            ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
-            players.add(new Human(i, connectionSocket, inFromClient, outToClient, false)); //add an online client
-            System.out.println("Connected to player " + i);
-            outToClient.writeObject("You connected to the server as player " + i + "\n");
-        }    
-    }
+    
+    
 
 	public PointSalad(String[] args) {
 		int numberPlayers = 0;
@@ -80,6 +42,7 @@ public class PointSalad{
 		IScoreCalculator scoreCalculator = new VegetableScoreCalculator(vegetableCounter);
 		ISetPile setVegetablePile = new SetVegetablePile();
 		IView pointSalladView = new PointSalladView(vegetableCounter);
+		INetwork pointSalladNetwork = new PointSaladNetwork();
 		
 		if(args.length == 0) {
 			System.out.println("Please enter the number of players (1-6): ");
@@ -96,7 +59,7 @@ public class PointSalad{
 			}
 			else {
 				try {
-					client(args[0]);
+					pointSalladNetwork.client(args[0]);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -108,7 +71,7 @@ public class PointSalad{
 		setVegetablePile.setPiles(numberPlayers+numberOfBots, piles);
 
 		try {
-			server(numberPlayers, numberOfBots);
+			pointSalladNetwork.server(numberPlayers, numberOfBots, players, aSocket);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -199,7 +162,7 @@ public class PointSalad{
 					}
 				}
 				thisPlayer.sendMessage("\nYour turn is completed\n****************************************************************\n\n");
-				sendToAllPlayers("Player " + thisPlayer.getPlayerID() + "'s hand is now: \n"+pointSalladView.displayHand(thisPlayer.getHand())+"\n");	
+				pointSalladNetwork.sendToAllPlayers("Player " + thisPlayer.getPlayerID() + "'s hand is now: \n"+pointSalladView.displayHand(thisPlayer.getHand())+"\n", players);	
 
 			} else {
 				// Bot logic
@@ -270,7 +233,7 @@ public class PointSalad{
 						}
 					}
 				}
-				sendToAllPlayers("Bot " + thisPlayer.getPlayerID() + "'s hand is now: \n"+pointSalladView.displayHand(thisPlayer.getHand())+"\n");
+				pointSalladNetwork.sendToAllPlayers("Bot " + thisPlayer.getPlayerID() + "'s hand is now: \n"+pointSalladView.displayHand(thisPlayer.getHand())+"\n", players);
 			}
 			
 			if(currentPlayer == players.size()-1) {
@@ -279,11 +242,11 @@ public class PointSalad{
 				currentPlayer++;
 			}
 		}
-		sendToAllPlayers(("\n-------------------------------------- CALCULATING SCORES --------------------------------------\n"));
+		pointSalladNetwork.sendToAllPlayers(("\n-------------------------------------- CALCULATING SCORES --------------------------------------\n"), players);
 		for(IPlayer player : players) {
-			sendToAllPlayers("Player " + player.getPlayerID() + "'s hand is: \n"+pointSalladView.displayHand(player.getHand()));
+			pointSalladNetwork.sendToAllPlayers("Player " + player.getPlayerID() + "'s hand is: \n"+pointSalladView.displayHand(player.getHand()), players);
 			player.setScore(scoreCalculator.calculateScore(player.getHand(), player, players)); 
-			sendToAllPlayers("\nPlayer " + player.getPlayerID() + "'s score is: " + player.getScore());
+			pointSalladNetwork.sendToAllPlayers("\nPlayer " + player.getPlayerID() + "'s score is: " + player.getScore(), players);
 		}
 
 		int maxScore = 0;
