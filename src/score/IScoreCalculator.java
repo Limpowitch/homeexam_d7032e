@@ -2,7 +2,7 @@ package score;
 
 import java.util.ArrayList;
 
-import exam.PointSalad.Card;
+import card.ICard;
 import player.IPlayer;
 
 /**
@@ -11,6 +11,6 @@ import player.IPlayer;
 
 public interface IScoreCalculator {
 
-	int calculateScore(ArrayList<Card> hand, IPlayer thisPlayer, ArrayList<IPlayer> players);
+	int calculateScore(ArrayList<ICard> hand, IPlayer thisPlayer, ArrayList<IPlayer> players);
 	
 }

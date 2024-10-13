@@ -1,8 +1,9 @@
 package score;
 
 import java.util.ArrayList;
-import exam.PointSalad.Card;
 
+import card.ICard;
+import card.Vegetable;
 /**
  * Interface for counting vegetables in a player's hand.
  */
@@ -14,7 +15,7 @@ public interface IVegetableCounter {
      * @param vegetable The specific vegetable to count.
      * @return The count of the specified vegetable.
      */
-    int countVegetables(ArrayList<Card> hand, Card.Vegetable vegetable);
+    int countVegetables(ArrayList<ICard> hand, Vegetable vegetable);
 
     /**
      * Counts the total number of vegetables in the hand.
@@ -22,5 +23,5 @@ public interface IVegetableCounter {
      * @param hand The player's hand containing vegetable cards.
      * @return The total count of vegetables.
      */
-    int countTotalVegetables(ArrayList<Card> hand);
+    int countTotalVegetables(ArrayList<ICard> hand);
 }

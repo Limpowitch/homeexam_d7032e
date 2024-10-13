@@ -22,213 +22,25 @@ import score.VegetableScoreCalculator;
 import score.IScoreCalculator;
 import score.IVegetableCounter;
 
+import pile.*;
+import card.*;
+
+
 public class PointSalad implements IVegetableCounter{
 	public ArrayList<IPlayer> players = new ArrayList<>();
-	public ArrayList<Pile> piles = new ArrayList<>();
+	public ArrayList<IPile> piles = new ArrayList<>();
     public ServerSocket aSocket;
 
-	
-
-	public class Pile {
-		public ArrayList<Card> cards = new ArrayList<Card>();
-		public Card[] veggieCards = new Card[2];
-
-		public Pile(ArrayList<Card> cards) {
-			this.cards = cards;
-			this.veggieCards[0] = cards.remove(0);
-			this.veggieCards[1] = cards.remove(0);	
-			this.veggieCards[0].criteriaSideUp = false;;
-			this.veggieCards[1].criteriaSideUp = false;
-		}
-		public Card getPointCard() {
-			if(cards.isEmpty()) {
-				//remove from the bottom of the biggest of the other piles
-				int biggestPileIndex = 0;
-				int biggestSize = 0;
-				for(int i = 0; i < piles.size(); i++) {
-					if(i != piles.indexOf(this) && piles.get(i).cards.size() > biggestSize) {
-						biggestSize = piles.get(i).cards.size();
-						biggestPileIndex = i;
-					}
-				}
-				if(biggestSize > 1) {
-					cards.add(piles.get(biggestPileIndex).cards.remove(piles.get(biggestPileIndex).cards.size()-1));
-				} else // we can't remove active point cards from other piles
-					return null;
-				}
-			return cards.get(0);
-		}
-		public Card buyPointCard() {
-			if(cards.isEmpty()) {
-				//remove from the bottom of the biggest of the other piles
-				int biggestPileIndex = 0;
-				int biggestSize = 0;
-				for(int i = 0; i < piles.size(); i++) {
-					if(i != piles.indexOf(this) && piles.get(i).cards.size() > biggestSize) {
-						biggestSize = piles.get(i).cards.size();
-						biggestPileIndex = i;
-					}
-				}
-				if(biggestSize > 1) {
-					cards.add(piles.get(biggestPileIndex).cards.remove(piles.get(biggestPileIndex).cards.size()-1));
-				} else { // we can't remove active point cards from other piles
-					return null;
-				} 
-			}
-			return cards.remove(0);
-		}
-		public Card getVeggieCard(int index) {
-			return veggieCards[index];
-		}
-		public Card buyVeggieCard(int index) {
-			Card aCard = veggieCards[index];
-			if(cards.size() <=1) {
-				//remove from the bottom of the biggest of the other piles
-				int biggestPileIndex = 0;
-				int biggestSize = 0;
-				for(int i = 0; i < piles.size(); i++) {
-					if(i != piles.indexOf(this) && piles.get(i).cards.size() > biggestSize) {
-						biggestSize = piles.get(i).cards.size();
-						biggestPileIndex = i;
-					}
-				}
-				if(biggestSize > 1) {
-					cards.add(piles.get(biggestPileIndex).cards.remove(piles.get(biggestPileIndex).cards.size()-1));
-					veggieCards[index] = cards.remove(0);
-					veggieCards[index].criteriaSideUp = false;
-				} else {
-					veggieCards[index] = null;
-				}
-			} else {
-				veggieCards[index] = cards.remove(0);
-				veggieCards[index].criteriaSideUp = false;
-			}
-
-			return aCard;
-		}
-		public boolean isEmpty() {
-			return cards.isEmpty() && veggieCards[0] == null && veggieCards[1] == null;
-		}
-	}
-
-	public static class Card {
-		public enum Vegetable {
-			PEPPER, LETTUCE, CARROT, CABBAGE, ONION, TOMATO
-		}
-
-		public Vegetable vegetable;
-		public String criteria;
-		public boolean criteriaSideUp = true;
-
-		public Card(Vegetable vegetable, String criteria) {
-			this.vegetable = vegetable;
-			this.criteria = criteria;
-		}
-
-		@Override
-		public String toString() {
-			if(criteriaSideUp) {
-				return criteria + " (" + vegetable + ")";
-			} else {
-				return vegetable.toString();
-			}
-		}
-	}
-
-    public void setPiles(int nrPlayers) {
-        ArrayList<Card> deckPepper = new ArrayList<>();
-        ArrayList<Card> deckLettuce = new ArrayList<>();
-		ArrayList<Card> deckCarrot = new ArrayList<>();
-		ArrayList<Card> deckCabbage = new ArrayList<>();
-		ArrayList<Card> deckOnion = new ArrayList<>();
-		ArrayList<Card> deckTomato = new ArrayList<>();
-
-        try (InputStream fInputStream = new FileInputStream("src/exam/PointSaladManifest.json");
-             Scanner scanner = new Scanner(fInputStream, "UTF-8").useDelimiter("\\A")) {
-
-            // Read the entire JSON file into a String
-            String jsonString = scanner.hasNext() ? scanner.next() : "";
-
-            // Parse the JSON string into a JSONObject
-            JSONObject jsonObject = new JSONObject(jsonString);
-
-            // Get the "cards" array from the JSONObject
-            JSONArray cardsArray = jsonObject.getJSONArray("cards");
-
-            // Iterate over each card in the array
-            for (int i = 0; i < cardsArray.length(); i++) {
-                JSONObject cardJson = cardsArray.getJSONObject(i);
-
-                // Get the criteria object from the card JSON
-                JSONObject criteriaObj = cardJson.getJSONObject("criteria");
-
-                // Add each vegetable card to the deck with its corresponding criteria
-                deckPepper.add(new Card(Card.Vegetable.PEPPER, criteriaObj.getString("PEPPER")));
-                deckLettuce.add(new Card(Card.Vegetable.LETTUCE, criteriaObj.getString("LETTUCE")));
-                deckCarrot.add(new Card(Card.Vegetable.CARROT, criteriaObj.getString("CARROT")));
-                deckCabbage.add(new Card(Card.Vegetable.CABBAGE, criteriaObj.getString("CABBAGE")));
-                deckOnion.add(new Card(Card.Vegetable.ONION, criteriaObj.getString("ONION")));
-                deckTomato.add(new Card(Card.Vegetable.TOMATO, criteriaObj.getString("TOMATO")));
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Shuffle each deck
-		shuffleDeck(deckPepper);
-		shuffleDeck(deckLettuce);
-		shuffleDeck(deckCarrot);
-		shuffleDeck(deckCabbage);
-		shuffleDeck(deckOnion);
-		shuffleDeck(deckTomato);
-
-		int cardsPerVeggie = nrPlayers/2 * 6;
-		
-		ArrayList<Card> deck = new ArrayList<>();
-		for(int i = 0; i < cardsPerVeggie; i++) {
-			deck.add(deckPepper.remove(0));
-			deck.add(deckLettuce.remove(0));
-			deck.add(deckCarrot.remove(0));
-			deck.add(deckCabbage.remove(0));
-			deck.add(deckOnion.remove(0));
-			deck.add(deckTomato.remove(0));
-		}
-		shuffleDeck(deck);
-
-		//divide the deck into 3 piles
-		ArrayList<Card> pile1 = new ArrayList<>();
-		ArrayList<Card> pile2 = new ArrayList<>();
-		ArrayList<Card> pile3 = new ArrayList<>();
-		for (int i = 0; i < deck.size(); i++) {
-			if (i % 3 == 0) {
-				pile1.add(deck.get(i));
-			} else if (i % 3 == 1) {
-				pile2.add(deck.get(i));
-			} else {
-				pile3.add(deck.get(i));
-			}
-		}
-		piles.add(new Pile(pile1));
-		piles.add(new Pile(pile2));
-		piles.add(new Pile(pile3));
-    }
-
-
-	public void shuffleDeck(ArrayList<Card> deck) {
-		Collections.shuffle(deck);
-	}
-
-	public String displayHand(ArrayList<Card> hand) {
+	public String displayHand(ArrayList<ICard> hand) {
 		String handString = "Criteria:\t";
 		for (int i = 0; i < hand.size(); i++) {
-			if(hand.get(i).criteriaSideUp && hand.get(i).vegetable != null) {
-				handString += "["+i+"] "+hand.get(i).criteria + " ("+hand.get(i).vegetable.toString()+")"+"\t";
+			if(hand.get(i).getCriteriaSideUp() && hand.get(i).getVegetable() != null) {
+				handString += "["+i+"] "+hand.get(i).getCriteria() + " ("+hand.get(i).getVegetable().toString()+")"+"\t";
 			}
 		}
 		handString += "\nVegetables:\t";
 		//Sum up the number of each vegetable and show the total number of each vegetable
-		for (Card.Vegetable vegetable : Card.Vegetable.values()) {
+		for (Vegetable vegetable : Vegetable.values()) {
 			int count = countVegetables(hand, vegetable);
 			if(count > 0) {
 				handString += vegetable + ": " + count + "\t";
@@ -243,20 +55,20 @@ public class PointSalad implements IVegetableCounter{
 		}
 	}
 	
-	public int countVegetables(ArrayList<Card> hand, Card.Vegetable vegetable) {
+	public int countVegetables(ArrayList<ICard> hand, Vegetable vegetable) {
 		int count = 0;
-		for (Card card : hand) {
-			if (!card.criteriaSideUp && card.vegetable == vegetable) {
+		for (ICard card : hand) {
+			if (!card.getCriteriaSideUp() && card.getVegetable() == vegetable) {
 				count++;
 			}
 		}
 		return count;
 	}
 
-	public int countTotalVegetables(ArrayList<Card> hand) {
+	public int countTotalVegetables(ArrayList<ICard> hand) {
 		int count = 0;
-		for (Card card : hand) {
-			if (!card.criteriaSideUp) {
+		for (ICard card : hand) {
+			if (!card.getCriteriaSideUp()) {
 				count++;
 			}
 		}
@@ -300,20 +112,20 @@ public class PointSalad implements IVegetableCounter{
 	private String printMarket() {
 		String pileString = "Point Cards:\t";
 		for (int p=0; p<piles.size(); p++) {
-			if(piles.get(p).getPointCard()==null) {
+			if(piles.get(p).getPointCard(piles)==null) {
 				pileString += "["+p+"]"+String.format("%-43s", "Empty") + "\t";
 			}
 			else
-				pileString += "["+p+"]"+String.format("%-43s", piles.get(p).getPointCard()) + "\t";
+				pileString += "["+p+"]"+String.format("%-43s", piles.get(p).getPointCard(piles)) + "\t";
 		}
 		pileString += "\nVeggie Cards:\t";
 		char veggieCardIndex = 'A';
-		for (Pile pile : piles) {
+		for (IPile pile : piles) {
 			pileString += "["+veggieCardIndex+"]"+String.format("%-43s", pile.getVeggieCard(0)) + "\t";
 			veggieCardIndex++;
 		}
 		pileString += "\n\t\t";
-		for (Pile pile : piles) {
+		for (IPile pile : piles) {
 			pileString += "["+veggieCardIndex+"]"+String.format("%-43s", pile.getVeggieCard(1)) + "\t";
 			veggieCardIndex++;
 		}
@@ -326,6 +138,7 @@ public class PointSalad implements IVegetableCounter{
 		int numberOfBots = 0;
 		
 		IScoreCalculator scoreCalculator = new VegetableScoreCalculator(this);
+		ISetPile setVegetablePile = new SetVegetablePile();
 		
 		if(args.length == 0) {
 			System.out.println("Please enter the number of players (1-6): ");
@@ -351,7 +164,7 @@ public class PointSalad implements IVegetableCounter{
 
 		
 
-		setPiles(numberPlayers+numberOfBots);
+		setVegetablePile.setPiles(numberPlayers+numberOfBots, piles);
 
 		try {
 			server(numberPlayers, numberOfBots);
@@ -366,7 +179,7 @@ public class PointSalad implements IVegetableCounter{
 		while(keepPlaying) {
 			IPlayer thisPlayer = players.get(currentPlayer);
 			boolean stillAvailableCards = false;
-			for(Pile p: piles) {
+			for(IPile p: piles) {
 				if(!p.isEmpty()) {
 					stillAvailableCards = true;
 					break;
@@ -388,11 +201,11 @@ public class PointSalad implements IVegetableCounter{
 					String pileChoice = thisPlayer.readMessage();
 					if(pileChoice.matches("\\d")) {
 						int pileIndex = Integer.parseInt(pileChoice);
-						if(piles.get(pileIndex).getPointCard() == null) {
+						if(piles.get(pileIndex).getPointCard(piles) == null) {
 							thisPlayer.sendMessage("\nThis pile is empty. Please choose another pile.\n");
 							continue;
 						} else {
-							thisPlayer.getHand().add(piles.get(pileIndex).buyPointCard());
+							thisPlayer.getHand().add(piles.get(pileIndex).buyPointCard(piles));
 							thisPlayer.sendMessage("\nYou took a card from pile " + (pileIndex) + " and added it to your hand.\n");
 							validChoice = true;
 						}
@@ -407,7 +220,7 @@ public class PointSalad implements IVegetableCounter{
 							int choice = Character.toUpperCase(pileChoice.charAt(charIndex)) - 'A';
 							int pileIndex = (choice == 0 || choice == 3) ? 0 : (choice == 1 || choice == 4) ? 1 : (choice == 2 || choice == 5) ? 2:-1;
 							int veggieIndex = (choice == 0 || choice == 1 || choice == 2) ? 0 : (choice == 3 || choice == 4 || choice == 5) ? 1 : -1;
-							if(piles.get(pileIndex).veggieCards[veggieIndex] == null) {
+							if(piles.get(pileIndex).getVeggieCard(veggieIndex) == null) {
 								thisPlayer.sendMessage("\nThis veggie is empty. Please choose another pile.\n");
 								validChoice = false;
 								break;
@@ -416,7 +229,7 @@ public class PointSalad implements IVegetableCounter{
 									validChoice = true;
 									break;
 								} else {
-									thisPlayer.getHand().add(piles.get(pileIndex).buyVeggieCard(veggieIndex));
+									thisPlayer.getHand().add(piles.get(pileIndex).buyVeggieCard(veggieIndex, piles));
 									takenVeggies++;
 									//thisPlayer.sendMessage("\nYou took a card from pile " + (pileIndex) + " and added it to your hand.\n");
 									validChoice = true;
@@ -428,8 +241,8 @@ public class PointSalad implements IVegetableCounter{
 				}
 				//Check if the player has any criteria cards in their hand
 				boolean criteriaCardInHand = false;
-				for(Card card : thisPlayer.getHand()) {
-					if(card.criteriaSideUp) {
+				for(ICard card : thisPlayer.getHand()) {
+					if(card.getCriteriaSideUp()) {
 						criteriaCardInHand = true;
 						break;
 					}
@@ -440,7 +253,8 @@ public class PointSalad implements IVegetableCounter{
 					String choice = thisPlayer.readMessage();
 					if(choice.matches("\\d")) {
 						int cardIndex = Integer.parseInt(choice);
-						thisPlayer.getHand().get(cardIndex).criteriaSideUp = false;
+						ICard selectedCard = thisPlayer.getHand().get(cardIndex);
+						selectedCard.setCriteriaSideUp(false);
 					}
 				}
 				thisPlayer.sendMessage("\nYour turn is completed\n****************************************************************\n\n");
@@ -460,12 +274,12 @@ public class PointSalad implements IVegetableCounter{
 					int highestPointCardIndex = 0;
 					int highestPointCardScore = 0;
 					for(int i = 0; i < piles.size(); i++) {
-						if(piles.get(i).getPointCard() != null) {
-							ArrayList<Card> tempHand = new ArrayList<Card>();
-							for(Card handCard : thisPlayer.getHand()) {
+						if(piles.get(i).getPointCard(piles) != null) {
+							ArrayList<ICard> tempHand = new ArrayList<ICard>();
+							for(ICard handCard : thisPlayer.getHand()) {
 								tempHand.add(handCard);
 							}
-							tempHand.add(piles.get(i).getPointCard());
+							tempHand.add(piles.get(i).getPointCard(piles));
 							int score = scoreCalculator.calculateScore(tempHand, thisPlayer, players);
 							if(score > highestPointCardScore) {
 								highestPointCardScore = score;
@@ -473,8 +287,8 @@ public class PointSalad implements IVegetableCounter{
 							}
 						}
 					}
-					if(piles.get(highestPointCardIndex).getPointCard() != null) {
-						thisPlayer.getHand().add(piles.get(highestPointCardIndex).buyPointCard());
+					if(piles.get(highestPointCardIndex).getPointCard(piles) != null) {
+						thisPlayer.getHand().add(piles.get(highestPointCardIndex).buyPointCard(piles));
 					} else {
 						choice = 1; //buy veggies instead
 						emptyPiles = true;
@@ -482,13 +296,13 @@ public class PointSalad implements IVegetableCounter{
 				} else if (choice == 1) {
 					// TODO: Check what Veggies are available and run calculateScore to see which veggies are best to pick
 					int cardsPicked = 0;
-					for(Pile pile : piles) {
-						if(pile.veggieCards[0] != null && cardsPicked < 2) {
-							thisPlayer.getHand().add(pile.buyVeggieCard(0));
+					for(IPile pile : piles) {
+						if(pile.getVeggieCard(0) != null && cardsPicked < 2) {
+							thisPlayer.getHand().add(pile.buyVeggieCard(0, piles));
 							cardsPicked++;
 						}
-						if(pile.veggieCards[1] != null && cardsPicked < 2) {
-							thisPlayer.getHand().add(pile.buyVeggieCard(1));
+						if(pile.getVeggieCard(1) != null && cardsPicked < 2) {
+							thisPlayer.getHand().add(pile.buyVeggieCard(1, piles));
 							cardsPicked++;
 						}
 					}
@@ -497,12 +311,12 @@ public class PointSalad implements IVegetableCounter{
 						int highestPointCardIndex = 0;
 						int highestPointCardScore = 0;
 						for(int i = 0; i < piles.size(); i++) {
-							if(piles.get(i).getPointCard() != null && piles.get(i).getPointCard().criteriaSideUp) {
-								ArrayList<Card> tempHand = new ArrayList<Card>();
-								for(Card handCard : thisPlayer.getHand()) {
+							if(piles.get(i).getPointCard(piles) != null && piles.get(i).getPointCard(piles).getCriteriaSideUp()) {
+								ArrayList<ICard> tempHand = new ArrayList<ICard>();
+								for(ICard handCard : thisPlayer.getHand()) {
 									tempHand.add(handCard);
 								}
-								tempHand.add(piles.get(i).getPointCard());
+								tempHand.add(piles.get(i).getPointCard(piles));
 								int score = scoreCalculator.calculateScore(tempHand, thisPlayer, players);
 								if(score > highestPointCardScore) {
 									highestPointCardScore = score;
@@ -510,8 +324,8 @@ public class PointSalad implements IVegetableCounter{
 								}
 							}
 						}
-						if(piles.get(highestPointCardIndex).getPointCard() != null) {
-							thisPlayer.getHand().add(piles.get(highestPointCardIndex).buyPointCard());
+						if(piles.get(highestPointCardIndex).getPointCard(piles) != null) {
+							thisPlayer.getHand().add(piles.get(highestPointCardIndex).buyPointCard(piles));
 						}
 					}
 				}

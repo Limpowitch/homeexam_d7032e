@@ -2,7 +2,7 @@ package player;
 
 import java.util.ArrayList;
 
-import exam.PointSalad.Card;
+import card.ICard;
 
 public interface IPlayer {
 
@@ -14,7 +14,7 @@ public interface IPlayer {
 
 	boolean isBot();
 
-	ArrayList<Card> getHand();
+	ArrayList<ICard> getHand();
 
 	int getScore();
 	

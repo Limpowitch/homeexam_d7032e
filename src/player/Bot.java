@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import exam.PointSalad.Card;
+import card.ICard;
 
 public class Bot implements IPlayer {
 	public int playerID;
@@ -17,7 +17,7 @@ public class Bot implements IPlayer {
 	public ObjectOutputStream outToClient;
 	public ArrayList<String> region = new ArrayList<String>();
 	Scanner in = new Scanner(System.in);
-	public ArrayList<Card> hand = new ArrayList<Card>();
+	public ArrayList<ICard> hand = new ArrayList<ICard>();
 	public int score = 0;
 
 
@@ -65,7 +65,7 @@ public class Bot implements IPlayer {
 	}
 
 	@Override
-	public ArrayList<Card> getHand() {
+	public ArrayList<ICard> getHand() {
 		// TODO Auto-generated method stub
 		return this.hand;
 	}
