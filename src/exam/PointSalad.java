@@ -20,59 +20,22 @@ import java.util.ArrayList;
 
 import score.VegetableScoreCalculator;
 import score.IScoreCalculator;
-import score.IVegetableCounter;
-
 import pile.*;
 import card.*;
+import counter.*;
+import view.*;
 
 
-public class PointSalad implements IVegetableCounter{
+public class PointSalad{
 	public ArrayList<IPlayer> players = new ArrayList<>();
 	public ArrayList<IPile> piles = new ArrayList<>();
     public ServerSocket aSocket;
 
-	public String displayHand(ArrayList<ICard> hand) {
-		String handString = "Criteria:\t";
-		for (int i = 0; i < hand.size(); i++) {
-			if(hand.get(i).getCriteriaSideUp() && hand.get(i).getVegetable() != null) {
-				handString += "["+i+"] "+hand.get(i).getCriteria() + " ("+hand.get(i).getVegetable().toString()+")"+"\t";
-			}
-		}
-		handString += "\nVegetables:\t";
-		//Sum up the number of each vegetable and show the total number of each vegetable
-		for (Vegetable vegetable : Vegetable.values()) {
-			int count = countVegetables(hand, vegetable);
-			if(count > 0) {
-				handString += vegetable + ": " + count + "\t";
-			}
-		}
-		return handString;
-	}
 
 	private void sendToAllPlayers(String message) {
 		for(IPlayer player : players) {
 			player.sendMessage(message);
 		}
-	}
-	
-	public int countVegetables(ArrayList<ICard> hand, Vegetable vegetable) {
-		int count = 0;
-		for (ICard card : hand) {
-			if (!card.getCriteriaSideUp() && card.getVegetable() == vegetable) {
-				count++;
-			}
-		}
-		return count;
-	}
-
-	public int countTotalVegetables(ArrayList<ICard> hand) {
-		int count = 0;
-		for (ICard card : hand) {
-			if (!card.getCriteriaSideUp()) {
-				count++;
-			}
-		}
-		return count;
 	}
 
 	public void client(String ipAddress) throws Exception {
@@ -109,36 +72,14 @@ public class PointSalad implements IVegetableCounter{
         }    
     }
 
-	private String printMarket() {
-		String pileString = "Point Cards:\t";
-		for (int p=0; p<piles.size(); p++) {
-			if(piles.get(p).getPointCard(piles)==null) {
-				pileString += "["+p+"]"+String.format("%-43s", "Empty") + "\t";
-			}
-			else
-				pileString += "["+p+"]"+String.format("%-43s", piles.get(p).getPointCard(piles)) + "\t";
-		}
-		pileString += "\nVeggie Cards:\t";
-		char veggieCardIndex = 'A';
-		for (IPile pile : piles) {
-			pileString += "["+veggieCardIndex+"]"+String.format("%-43s", pile.getVeggieCard(0)) + "\t";
-			veggieCardIndex++;
-		}
-		pileString += "\n\t\t";
-		for (IPile pile : piles) {
-			pileString += "["+veggieCardIndex+"]"+String.format("%-43s", pile.getVeggieCard(1)) + "\t";
-			veggieCardIndex++;
-		}
-		return pileString;
-	}
-
-
 	public PointSalad(String[] args) {
 		int numberPlayers = 0;
 		int numberOfBots = 0;
 		
-		IScoreCalculator scoreCalculator = new VegetableScoreCalculator(this);
+		ICounter vegetableCounter = new VegetableCounter();
+		IScoreCalculator scoreCalculator = new VegetableScoreCalculator(vegetableCounter);
 		ISetPile setVegetablePile = new SetVegetablePile();
+		IView pointSalladView = new PointSalladView(vegetableCounter);
 		
 		if(args.length == 0) {
 			System.out.println("Please enter the number of players (1-6): ");
@@ -191,10 +132,10 @@ public class PointSalad implements IVegetableCounter{
 			}
 			if(!thisPlayer.isBot()) {
 				thisPlayer.sendMessage("\n\n****************************************************************\nIt's your turn! Your hand is:\n");
-				thisPlayer.sendMessage(displayHand(thisPlayer.getHand()));
+				thisPlayer.sendMessage(pointSalladView.displayHand(thisPlayer.getHand()));
 				thisPlayer.sendMessage("\nThe piles are: ");
 			
-				thisPlayer.sendMessage(printMarket());
+				thisPlayer.sendMessage(pointSalladView.printMarket(piles));
 				boolean validChoice = false;
 				while(!validChoice) {
 					thisPlayer.sendMessage("\n\nTake either one point card (Syntax example: 2) or up to two vegetable cards (Syntax example: CF).\n");
@@ -249,7 +190,7 @@ public class PointSalad implements IVegetableCounter{
 				}
 				if(criteriaCardInHand) {
 					//Give the player an option to turn a criteria card into a veggie card
-					thisPlayer.sendMessage("\n"+displayHand(thisPlayer.getHand())+"\nWould you like to turn a criteria card into a veggie card? (Syntax example: n or 2)");
+					thisPlayer.sendMessage("\n"+pointSalladView.displayHand(thisPlayer.getHand())+"\nWould you like to turn a criteria card into a veggie card? (Syntax example: n or 2)");
 					String choice = thisPlayer.readMessage();
 					if(choice.matches("\\d")) {
 						int cardIndex = Integer.parseInt(choice);
@@ -258,7 +199,7 @@ public class PointSalad implements IVegetableCounter{
 					}
 				}
 				thisPlayer.sendMessage("\nYour turn is completed\n****************************************************************\n\n");
-				sendToAllPlayers("Player " + thisPlayer.getPlayerID() + "'s hand is now: \n"+displayHand(thisPlayer.getHand())+"\n");	
+				sendToAllPlayers("Player " + thisPlayer.getPlayerID() + "'s hand is now: \n"+pointSalladView.displayHand(thisPlayer.getHand())+"\n");	
 
 			} else {
 				// Bot logic
@@ -329,7 +270,7 @@ public class PointSalad implements IVegetableCounter{
 						}
 					}
 				}
-				sendToAllPlayers("Bot " + thisPlayer.getPlayerID() + "'s hand is now: \n"+displayHand(thisPlayer.getHand())+"\n");
+				sendToAllPlayers("Bot " + thisPlayer.getPlayerID() + "'s hand is now: \n"+pointSalladView.displayHand(thisPlayer.getHand())+"\n");
 			}
 			
 			if(currentPlayer == players.size()-1) {
@@ -340,7 +281,7 @@ public class PointSalad implements IVegetableCounter{
 		}
 		sendToAllPlayers(("\n-------------------------------------- CALCULATING SCORES --------------------------------------\n"));
 		for(IPlayer player : players) {
-			sendToAllPlayers("Player " + player.getPlayerID() + "'s hand is: \n"+displayHand(player.getHand()));
+			sendToAllPlayers("Player " + player.getPlayerID() + "'s hand is: \n"+pointSalladView.displayHand(player.getHand()));
 			player.setScore(scoreCalculator.calculateScore(player.getHand(), player, players)); 
 			sendToAllPlayers("\nPlayer " + player.getPlayerID() + "'s score is: " + player.getScore());
 		}

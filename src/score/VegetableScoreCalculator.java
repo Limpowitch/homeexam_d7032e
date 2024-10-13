@@ -4,13 +4,14 @@ import java.util.ArrayList;
 
 import card.ICard;
 import card.Vegetable;
+import counter.ICounter;
 import exam.PointSalad;
 import player.IPlayer;
 
 public class VegetableScoreCalculator implements IScoreCalculator {
-    private IVegetableCounter vegetableCounter;
+    private ICounter vegetableCounter;
 	
-	public VegetableScoreCalculator(IVegetableCounter vegetableCounter) {
+	public VegetableScoreCalculator(ICounter vegetableCounter) {
 		this.vegetableCounter = vegetableCounter;
 	}
 	

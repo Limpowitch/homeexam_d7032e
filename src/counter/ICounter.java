@@ -1,4 +1,4 @@
-package score;
+package counter;
 
 import java.util.ArrayList;
 
@@ -7,7 +7,7 @@ import card.Vegetable;
 /**
  * Interface for counting vegetables in a player's hand.
  */
-public interface IVegetableCounter {
+public interface ICounter {
     /**
      * Counts the number of a specific vegetable in the hand.
      *
