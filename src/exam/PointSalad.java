@@ -8,6 +8,8 @@ package exam;
 
 import java.util.Scanner;
 import player.IPlayer;
+
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 
@@ -60,7 +62,12 @@ public class PointSalad{
 
 		
 
-		setVegetablePile.setPiles(numberPlayers+numberOfBots, piles);
+		try {
+			setVegetablePile.setPiles(numberPlayers+numberOfBots, piles);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		try {
 			pointSalladNetwork.server(numberPlayers, numberOfBots, players, aSocket);

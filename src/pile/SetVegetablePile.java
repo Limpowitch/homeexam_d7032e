@@ -15,68 +15,76 @@ import card.Vegetable;
 import card.VegetableCard;
 
 public class SetVegetablePile implements ISetPile {
+	private static final int NUMBER_OF_PILES = 3;
+    Vegetable[] vegetables = Vegetable.values();
 
-    public void setPiles(int nrPlayers, ArrayList<IPile> piles) {
-        // Get all the vegetables dynamically
-        Vegetable[] vegetables = Vegetable.values();
-        // Create a list of decks, one for each vegetable
-        ArrayList<ArrayList<ICard>> decks = new ArrayList<>();
+	
+    public void setPiles(int nrPlayers, ArrayList<IPile> piles) throws IOException {
+        
+        JSONArray cardsArray = loadCardsFromJson();
+        ArrayList<ArrayList<ICard>> decks =  createDecks(vegetables, cardsArray);
+        ArrayList<ICard> mainDeck = buildMainDeck(nrPlayers, decks);
+        divideIntoPiles(mainDeck, piles);
+        
 
-        // Initialize decks for each vegetable
-        for (int i = 0; i < vegetables.length; i++) {
+    }
+    
+    private JSONArray loadCardsFromJson() throws IOException{
+    	
+    	try (InputStream fInputStream = new FileInputStream("src/exam/PointSaladManifest.json");
+                Scanner scanner = new Scanner(fInputStream, "UTF-8").useDelimiter("\\A")) {
+
+                String jsonString = scanner.hasNext() ? scanner.next() : "";
+
+                JSONObject jsonObject = new JSONObject(jsonString);
+
+                JSONArray cardsArray = jsonObject.getJSONArray("cards");
+                
+                return cardsArray;
+                
+    	} catch (IOException e) {
+            e.printStackTrace();
+    		throw new IOException("Failed to load cards from JSON");
+    	}
+    }
+    
+    private ArrayList<ArrayList<ICard>> createDecks(Vegetable[] vegetables, JSONArray cardsArray) {
+        
+    	ArrayList<ArrayList<ICard>> decks = new ArrayList<>();
+    	for (int i = 0; i < vegetables.length; i++) {
             decks.add(new ArrayList<ICard>());
         }
 
-        try (InputStream fInputStream = new FileInputStream("src/exam/PointSaladManifest.json");
-             Scanner scanner = new Scanner(fInputStream, "UTF-8").useDelimiter("\\A")) {
+        for (int i = 0; i < cardsArray.length(); i++) {
+            JSONObject cardJson = cardsArray.getJSONObject(i);
 
-            // Read the entire JSON file into a String
-            String jsonString = scanner.hasNext() ? scanner.next() : "";
+            JSONObject criteriaObj = cardJson.getJSONObject("criteria");
 
-            // Parse the JSON string into a JSONObject
-            JSONObject jsonObject = new JSONObject(jsonString);
+            for (int j = 0; j < vegetables.length; j++) {
+                Vegetable vegetable = vegetables[j];
+                String vegetableName = vegetable.name(); 
+                String criteria = criteriaObj.getString(vegetableName);
 
-            // Get the "cards" array from the JSONObject
-            JSONArray cardsArray = jsonObject.getJSONArray("cards");
-
-            // Iterate over each card in the array
-            for (int i = 0; i < cardsArray.length(); i++) {
-                JSONObject cardJson = cardsArray.getJSONObject(i);
-
-                // Get the criteria object from the card JSON
-                JSONObject criteriaObj = cardJson.getJSONObject("criteria");
-
-                // For each vegetable, add a card to the corresponding deck
-                for (int j = 0; j < vegetables.length; j++) {
-                    Vegetable vegetable = vegetables[j];
-                    String vegetableName = vegetable.name(); // Get the name of the vegetable
-                    String criteria = criteriaObj.getString(vegetableName);
-
-                    decks.get(j).add(new VegetableCard(vegetable, criteria));
-                }
+                decks.get(j).add(new VegetableCard(vegetable, criteria));
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
-        // Shuffle each deck
         for (ArrayList<ICard> deck : decks) {
             shuffleDeck(deck);
         }
+        
+        return decks;
+    }
+    
+    private ArrayList<ICard> buildMainDeck(int nrPlayers, ArrayList<ArrayList<ICard>> decks){
+    	ArrayList<ICard> mainDeck = new ArrayList<>();
 
-        // Now, build the main deck
-        ArrayList<ICard> mainDeck = new ArrayList<>();
-
-        // Determine the number of cards per vegetable
         int cardsPerVeggie = nrPlayers / 2 * 6;
 
-        // Adjust cardsPerVeggie if necessary
         for (ArrayList<ICard> deck : decks) {
             cardsPerVeggie = Math.min(cardsPerVeggie, deck.size());
         }
 
-        // Add cards from each deck to the main deck
         for (int i = 0; i < cardsPerVeggie; i++) {
             for (int j = 0; j < decks.size(); j++) {
                 if (!decks.get(j).isEmpty()) {
@@ -85,28 +93,24 @@ public class SetVegetablePile implements ISetPile {
             }
         }
 
-        // Shuffle the main deck
         shuffleDeck(mainDeck);
+    	
+        return mainDeck;
+    }	
 
-        // Divide the main deck into 3 piles
-        ArrayList<ICard> pile1 = new ArrayList<>();
-        ArrayList<ICard> pile2 = new ArrayList<>();
-        ArrayList<ICard> pile3 = new ArrayList<>();
-
-        for (int i = 0; i < mainDeck.size(); i++) {
-            if (i % 3 == 0) {
-                pile1.add(mainDeck.get(i));
-            } else if (i % 3 == 1) {
-                pile2.add(mainDeck.get(i));
-            } else {
-                pile3.add(mainDeck.get(i));
-            }
+    private void divideIntoPiles(ArrayList<ICard> mainDeck, ArrayList<IPile> piles) {
+    	ArrayList<ArrayList<ICard>> pilesList = new ArrayList<>();
+        for (int i = 0; i < NUMBER_OF_PILES; i++) {
+            pilesList.add(new ArrayList<>());
         }
-
-        // Add the piles to the list of piles
-        piles.add(new VegetablePile(pile1));
-        piles.add(new VegetablePile(pile2));
-        piles.add(new VegetablePile(pile3));
+        
+        for (int i = 0; i < mainDeck.size(); i++) {
+            pilesList.get(i % NUMBER_OF_PILES).add(mainDeck.get(i));
+        }
+        
+        for (ArrayList<ICard> pile : pilesList) {
+            piles.add(new VegetablePile(pile));
+        }
     }
 
     public void shuffleDeck(ArrayList<ICard> deck) {

@@ -4,9 +4,9 @@ package card;
 
 public class VegetableCard implements ICard{
 
-	public Vegetable vegetable;
-	public String criteria;
-	public boolean criteriaSideUp = true;
+	private Vegetable vegetable;
+	private String criteria;
+	private boolean criteriaSideUp = true;
 
 	public VegetableCard(Vegetable vegetable, String criteria) {
 		this.vegetable = vegetable;
