@@ -19,7 +19,7 @@ public class VegetablePile implements IPile{
 		this.cards = cards;
 		this.veggieCards[0] = cards.remove(0);
 		this.veggieCards[1] = cards.remove(0);	
-		this.veggieCards[1].setCriteriaSideUp(false);
+		this.veggieCards[0].setCriteriaSideUp(false);
 		this.veggieCards[1].setCriteriaSideUp(false);
 	}
 	public ICard getPointCard(ArrayList<IPile> piles) {

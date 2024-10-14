@@ -1,25 +1,17 @@
+///compile with javac -p lib -d bin src/module-info.java src/card/*.java src/counter/*.java src/exam/*.java src/network/*.java src/pile/*.java src/player/*.java src/score/*.java src/view/*.java
+
+//& java -p "lib;bin" -m Homeexam/exam.PointSalad
+
+
+
 package exam;
-import java.util.Collections;
+
 import java.util.Scanner;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import player.Bot;
-import player.Human;
 import player.IPlayer;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 
-import score.VegetableScoreCalculator;
-import score.IScoreCalculator;
+import score.*;
 import pile.*;
 import card.*;
 import counter.*;
