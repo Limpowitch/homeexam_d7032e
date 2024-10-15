@@ -14,19 +14,17 @@ import card.ICard;
 import card.Vegetable;
 import card.VegetableCard;
 
-public class SetVegetablePile implements ISetPile {
+public class VegetablePileInitializer implements IPileInitializer {
 	private static final int NUMBER_OF_PILES = 3;
     Vegetable[] vegetables = Vegetable.values();
+    private final IPileCoordinator pileCoordinator = new VegetablePileCoordinator();
 
 	
     public void setPiles(int nrPlayers, ArrayList<IPile> piles) throws IOException {
-        
         JSONArray cardsArray = loadCardsFromJson();
         ArrayList<ArrayList<ICard>> decks =  createDecks(vegetables, cardsArray);
         ArrayList<ICard> mainDeck = buildMainDeck(nrPlayers, decks);
         divideIntoPiles(mainDeck, piles);
-        
-
     }
     
     private JSONArray loadCardsFromJson() throws IOException{
@@ -49,8 +47,8 @@ public class SetVegetablePile implements ISetPile {
     }
     
     private ArrayList<ArrayList<ICard>> createDecks(Vegetable[] vegetables, JSONArray cardsArray) {
-        
     	ArrayList<ArrayList<ICard>> decks = new ArrayList<>();
+    	
     	for (int i = 0; i < vegetables.length; i++) {
             decks.add(new ArrayList<ICard>());
         }
@@ -100,6 +98,7 @@ public class SetVegetablePile implements ISetPile {
 
     private void divideIntoPiles(ArrayList<ICard> mainDeck, ArrayList<IPile> piles) {
     	ArrayList<ArrayList<ICard>> pilesList = new ArrayList<>();
+    	
         for (int i = 0; i < NUMBER_OF_PILES; i++) {
             pilesList.add(new ArrayList<>());
         }
@@ -109,7 +108,7 @@ public class SetVegetablePile implements ISetPile {
         }
         
         for (ArrayList<ICard> pile : pilesList) {
-            piles.add(new VegetablePile(pile));
+            piles.add(new VegetablePile(pile, pileCoordinator));
         }
     }
 

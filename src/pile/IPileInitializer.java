@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import card.ICard;
 
-public interface ISetPile {
+public interface IPileInitializer {
 
 	void setPiles(int i, ArrayList<IPile> piles) throws IOException;
 	

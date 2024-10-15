@@ -10,12 +10,13 @@ public interface IPile {
 	
 	ICard getVeggieCard(int index);
 	
-	boolean isEmpty();
-
 	ICard buyPointCard(ArrayList<IPile> piles);
 	
 	ICard buyVeggieCard(int index, ArrayList<IPile> piles);
-	
+
 	ArrayList<ICard> getCards();
-		
+	
+	boolean isEmpty();
+	
+	ICard drawCard();
 }

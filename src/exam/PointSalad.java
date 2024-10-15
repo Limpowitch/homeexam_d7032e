@@ -34,7 +34,7 @@ public class PointSalad{
 		
 		ICounter vegetableCounter = new VegetableCounter();
 		IScoreCalculator scoreCalculator = new VegetableScoreCalculator(vegetableCounter);
-		ISetPile setVegetablePile = new SetVegetablePile();
+		IPileInitializer setVegetablePile = new VegetablePileInitializer();
 		IView pointSalladView = new PointSalladView(vegetableCounter);
 		INetwork pointSalladNetwork = new PointSaladNetwork();
 		
