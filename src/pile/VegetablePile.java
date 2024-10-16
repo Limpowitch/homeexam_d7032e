@@ -8,12 +8,12 @@ public class VegetablePile implements IPile {
     private ICard[] veggieCards = new ICard[2];
     private final IPileCoordinator pileCoordinator;
     
-    public VegetablePile(ArrayList<ICard> cards, IPileCoordinator pileHelper) {
+    public VegetablePile(ArrayList<ICard> cards, IPileCoordinator pileCoordinator) {
         if (cards == null || cards.size() < 2) {
             throw new IllegalArgumentException("Initial cards cannot be null and must contain at least two cards.");
         }
         this.cards = cards;
-        this.pileCoordinator = pileHelper;
+        this.pileCoordinator = pileCoordinator;
         this.veggieCards[0] = cards.remove(0);
         this.veggieCards[1] = cards.remove(0);    
         this.veggieCards[0].setCriteriaSideUp(false);

@@ -14,6 +14,9 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 
 import score.*;
+import score.calculators.*;
+import score.parser.CriteriaParser;
+import score.parser.ICriteriaParser;
 import pile.*;
 import card.*;
 import counter.*;
@@ -33,7 +36,21 @@ public class PointSalad{
 		int numberOfBots = 0;
 		
 		ICounter vegetableCounter = new VegetableCounter();
-		IScoreCalculator scoreCalculator = new VegetableScoreCalculator(vegetableCounter);
+		ICriteriaParser vegetableCriteriaParser = new CriteriaParser();
+		ArrayList<ICriteriaCalculator> calculators = new ArrayList<>();
+
+		// Add calculators to the list in order of specificity
+		calculators.add(new VegetableParityCalculator(vegetableCounter));
+		calculators.add(new VegetableTypeCalculator(vegetableCounter));
+		calculators.add(new VegetableFewestCalculator(vegetableCounter));
+		calculators.add(new VegetableMostCalculator(vegetableCounter));
+		calculators.add(new VegetableSetCalculator(vegetableCounter));
+		calculators.add(new VegetablePlusCalculator(vegetableCounter));
+		calculators.add(new VegetableSlashCalculator(vegetableCounter));
+		calculators.add(new VegetableTotalCalculator(vegetableCounter));
+		
+		ICriteriaCalculatorFactory vegetableCriteriaFactory = new VegetableCriteriaFactory(calculators);
+		IScoreCalculator scoreCalculator = new VegetableScoreCalculator(vegetableCriteriaFactory, vegetableCriteriaParser);
 		IPileInitializer setVegetablePile = new VegetablePileInitializer();
 		IView pointSalladView = new PointSalladView(vegetableCounter);
 		INetwork pointSalladNetwork = new PointSaladNetwork();
