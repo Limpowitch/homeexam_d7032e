@@ -7,7 +7,12 @@
 package exam;
 
 import java.util.Scanner;
+
 import player.IPlayer;
+import player.online.*;
+import player.offline.*;
+
+
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -61,36 +66,55 @@ public class PointSalad{
 			numberPlayers = in.nextInt();
 			System.out.println("Please enter the number of bots (0-5): ");
 			numberOfBots = in.nextInt();
-		}
-		else {
-			//check if args[0] is a String (ip address) or an integer (number of players)
-			if(args[0].matches("\\d+")) {
-				numberPlayers = Integer.parseInt(args[0]);
-				numberOfBots = Integer.parseInt(args[1]);
-			}
-			else {
-				try {
-					pointSalladNetwork.client(args[0]);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-
 		
-
+		} else if(args[0].matches("\\d+")){
+			//check if args[0] is a String (ip address) or an integer (number of players)
+			numberPlayers = Integer.parseInt(args[0]);
+			numberOfBots = Integer.parseInt(args[1]); 
+			
+		} else {
+			try {
+				pointSalladNetwork.client(args[0]);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		try {
 			setVegetablePile.setPiles(numberPlayers+numberOfBots, piles);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		if(numberPlayers > 1) {
+			IInitializeOnlinePlayers newOnlinePlayers = new InitializeOnlinePlayers(pointSalladNetwork, aSocket);
+			try {
+				newOnlinePlayers.initializePlayers(numberPlayers, numberOfBots, players);
+				System.out.println(players);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		} else {
+			System.out.println("ENTERED OFFLINE");
+			IInitializeOfflinePlayers newOfflinePlayers = new InitializeOfflinePlayers();
+			try {
+				this.players = newOfflinePlayers.initializePlayers(numberPlayers, numberOfBots, players);
+				System.out.println(players);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} 
+		
 
-		try {
-			pointSalladNetwork.server(numberPlayers, numberOfBots, players, aSocket);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
+
+		
+
+		
 
 		// Set random starting player
 		int currentPlayer = (int) (Math.random() * (players.size()));
@@ -110,6 +134,7 @@ public class PointSalad{
 				break;
 			}
 			if(!thisPlayer.isBot()) {
+				System.out.println("Passed is-bot check");
 				thisPlayer.sendMessage("\n\n****************************************************************\nIt's your turn! Your hand is:\n");
 				thisPlayer.sendMessage(pointSalladView.displayHand(thisPlayer.getHand()));
 				thisPlayer.sendMessage("\nThe piles are: ");
