@@ -1,6 +1,8 @@
 package score.calculators;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import card.ICard;
 import card.Vegetable;
@@ -16,48 +18,73 @@ public class VegetablePlusCalculator implements ICriteriaCalculator{
 
 	@Override
 	public boolean canHandle(String criteriaSegment) {
-	    return criteriaSegment.contains("+") && criteriaSegment.contains("=");
+	    return criteriaSegment.contains("+");
 	}
 
 	@Override
-	public int calculate(String criteriaSegment, ArrayList<ICard> hand, IPlayer thisPlayer,ArrayList<IPlayer> players) {
-        int score = 0;
-        
-        if (criteriaSegment.contains("+")) {
-            String expr = criteriaSegment.split("=")[0].trim(); 
-            String[] vegs = expr.split("\\+"); 
-            int[] nrVeg = new int[vegs.length];
-            int countSameKind = 1;
+	public int calculate(String criteriaSegment, ArrayList<ICard> hand, IPlayer thisPlayer, ArrayList<IPlayer> players) {
+        int totalScore = 0;
 
-            
-            for (int j = 1; j < vegs.length; j++) {
-                if (vegs[0].trim().equals(vegs[j].trim())) {
-                    countSameKind++;
+        // Split multiple criteria separated by commas
+        String[] criteriaComponents = criteriaSegment.split(",");
+
+        for (String component : criteriaComponents) {
+            component = component.trim();
+
+            // Split into left expression and required value
+            String[] parts = component.split("=");
+            if (parts.length != 2) {
+                System.err.println("Invalid criteria format: " + component);
+                continue;
+            }
+
+            String leftExpr = parts[0].trim();
+            String rightValueStr = parts[1].trim();
+
+            int requiredPoints;
+            try {
+                requiredPoints = Integer.parseInt(rightValueStr);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid points value in criteria: " + component);
+                continue;
+            }
+
+            // Count required vegetables
+            String[] vegs = leftExpr.split("\\+");
+            Map<Vegetable, Integer> requiredVegCounts = new HashMap<>();
+            for (String veg : vegs) {
+                veg = veg.trim().toUpperCase();
+                try {
+                    Vegetable vegetable = Vegetable.valueOf(veg);
+                    requiredVegCounts.put(vegetable, requiredVegCounts.getOrDefault(vegetable, 0) + 1);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("Invalid vegetable name in criteria: " + veg);
+                    continue;
                 }
             }
 
-            int points = Integer.parseInt(criteriaSegment.split("=")[1].trim()); 
+            // Check if player meets the required counts
+            boolean conditionMet = true;
+            for (Map.Entry<Vegetable, Integer> entry : requiredVegCounts.entrySet()) {
+                Vegetable veg = entry.getKey();
+                int requiredCount = entry.getValue();
+                int playerCount = vegetableCounter.countVegetables(hand, veg);
+                if (playerCount < requiredCount) {
+                    conditionMet = false;
+                    break;
+                }
+            }
 
-            if (countSameKind > 1) {
-                
-                int vegCount = vegetableCounter.countVegetables(hand, Vegetable.valueOf(vegs[0].trim().toUpperCase()));
-                score += (vegCount / countSameKind) * points;
+            if (conditionMet) {
+                totalScore += requiredPoints;
+                System.out.println("Condition met for: " + component + ". Awarded: " + requiredPoints + " points.");
             } else {
-               
-                for (int i = 0; i < vegs.length; i++) {
-                    nrVeg[i] = vegetableCounter.countVegetables(hand, Vegetable.valueOf(vegs[i].trim().toUpperCase()));
-                }
-               
-                int min = nrVeg[0];
-                for (int x = 1; x < nrVeg.length; x++) {
-                    if (nrVeg[x] < min) {
-                        min = nrVeg[x];
-                    }
-                }
-                score += min * points; 
+                System.out.println("Condition NOT met for: " + component + ". No points awarded.");
             }
         }
-        return score;
+
+        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " EQUALS= " + totalScore + " ");
+        return totalScore;
     }
 }
 

@@ -1,7 +1,5 @@
 package score.parser;
-
 import java.util.ArrayList;
-
 public class CriteriaParser implements ICriteriaParser{
     /**
      * Splits the criteria string into manageable parts for processing.
@@ -11,7 +9,6 @@ public class CriteriaParser implements ICriteriaParser{
      */
 	public ArrayList<String> splitCriteria(String criteria) {
 	    ArrayList<String> parts = new ArrayList<>();
-
 	    // Check if the criteria contains a colon, indicating complex criteria
 	    if (criteria.contains(":")) {
 	        // Treat the entire criteria as one part to preserve its structure
@@ -23,8 +20,6 @@ public class CriteriaParser implements ICriteriaParser{
 	            parts.add(part.trim());
 	        }
 	    }
-
 	    return parts;
 	}
-
 }

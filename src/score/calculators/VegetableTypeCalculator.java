@@ -18,41 +18,41 @@ public class VegetableTypeCalculator implements ICriteriaCalculator {
 
     @Override
     public boolean canHandle(String criteriaSegment) {
-        return criteriaSegment.matches("\\d+\\s*/\\s*VEGETABLE\\s*TYPE\\s*>?=\\s*\\d+");
+        return criteriaSegment.contains("TYPE") || criteriaSegment.contains(">=");
     }
 
     @Override
     public int calculate(String criteriaSegment, ArrayList<ICard> hand, IPlayer thisPlayer, ArrayList<IPlayer> players) {
-        // Extract points and required number of types
+    	int score = 0;
         String[] parts = criteriaSegment.split("/");
         int points = Integer.parseInt(parts[0].trim());
         String conditionPart = parts[1].trim();
 
-        // Extract the required number of vegetable types
-        String[] conditionTokens = conditionPart.split(">=");
-        if (conditionTokens.length != 2) {
-            System.out.println("Invalid criteria format: " + criteriaSegment);
-            return 0;
-        }
-        int requiredTypes = Integer.parseInt(conditionTokens[1].trim());
-
-        // Count the number of unique vegetable types in the hand
-        Set<Vegetable> uniqueVegetables = new HashSet<>();
-        for (ICard card : hand) {
-            if (!card.getCriteriaSideUp()) {
-                // The card is a vegetable card
-                Vegetable vegetable = card.getVegetable();
-                uniqueVegetables.add(vegetable);
-            }
-        }
-        int vegTypes = uniqueVegetables.size();
-
-        // If the player has at least the required number of types, award points
-        if (vegTypes >= requiredTypes) {
-            return points;
+        if(conditionPart.contains("MISSING")) {
+        	int missing = 0;
+        	for (Vegetable vegetable : Vegetable.values()) {
+        		if(vegetableCounter.countVegetables(hand, vegetable) == 0) {
+        			missing++;
+        		}
+        	}
+        	score += missing * points;
+        	
         } else {
-            return 0;
+        	int atLeastPerVegType = Integer.parseInt(conditionPart.substring(conditionPart.indexOf(">=")+2).trim());
+			int totalType = 0;
+			for(Vegetable vegetable : Vegetable.values()) {
+				int countVeg = vegetableCounter.countVegetables(hand, vegetable);
+				if(countVeg >= atLeastPerVegType) {
+					totalType++;
+				}
+			}
+			
+			score += totalType * points;
         }
+        
+        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
+    	return score;
+
     }
 }
 

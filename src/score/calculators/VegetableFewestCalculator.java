@@ -16,38 +16,34 @@ public class VegetableFewestCalculator implements ICriteriaCalculator{
 
 	@Override
 	public boolean canHandle(String criteriaSegment) {
-	    return criteriaSegment.contains("FEWEST")
-	           && criteriaSegment.contains("=")
-	           && !criteriaSegment.contains("TOTAL VEGETABLE");
+	    return criteriaSegment.contains("FEWEST") && !criteriaSegment.contains("TOTAL");
 	}
-
 
 	@Override
 	public int calculate(String criteriaSegment, ArrayList<ICard> hand, IPlayer thisPlayer,ArrayList<IPlayer> players) {
         int score = 0;
-        
-        if (criteriaSegment.contains("FEWEST")) {
-            int vegIndex = criteriaSegment.indexOf("FEWEST") + 7; 
-            String veg = criteriaSegment.substring(vegIndex, criteriaSegment.indexOf("=")).trim(); 
-            Vegetable vegetable = Vegetable.valueOf(veg.toUpperCase());
-            int countVeg = vegetableCounter.countVegetables(hand, vegetable);
-            int minVeg = countVeg;
+        int vegIndex = criteriaSegment.indexOf("FEWEST") + 7; 
+        String veg = criteriaSegment.substring(vegIndex, criteriaSegment.indexOf("=")).trim(); 
+        Vegetable vegetable = Vegetable.valueOf(veg.toUpperCase());
+        int thisPlayerTotal = vegetableCounter.countVegetables(hand, vegetable);
+        int fewestAmount = thisPlayerTotal;
 
-            
-            for (IPlayer p : players) {
-                if (p.getPlayerID() != thisPlayer.getPlayerID()) {
-                    int playerVeg = vegetableCounter.countVegetables(p.getHand(), vegetable);
-                    if (playerVeg < minVeg) {
-                        minVeg = playerVeg;
-                    }
+        
+        for (IPlayer p : players) {
+            if (p.getPlayerID() != thisPlayer.getPlayerID()) {
+                int playerVeg = vegetableCounter.countVegetables(p.getHand(), vegetable);
+                if (playerVeg < fewestAmount) {
+                	fewestAmount = playerVeg;
                 }
             }
-
-            
-            if (minVeg == countVeg) {
-                score += Integer.parseInt(criteriaSegment.substring(criteriaSegment.indexOf("=") + 1).trim());
-            }
         }
+
+        
+        if (fewestAmount == thisPlayerTotal) {
+            score += Integer.parseInt(criteriaSegment.substring(criteriaSegment.indexOf("=") + 1).trim());
+        }
+        
+        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
         return score;
     }
 }

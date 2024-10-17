@@ -1,9 +1,9 @@
 package score.parser;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public interface ICriteriaParser {
 
-	List<String> splitCriteria(String criteria);
+	ArrayList<String> splitCriteria(String criteria);
 
 }

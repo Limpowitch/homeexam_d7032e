@@ -35,6 +35,7 @@ public class VegetableSetCalculator implements ICriteriaCalculator{
             }
             score += addScore;
         }
+        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
         return score;
     }
 }

@@ -7,11 +7,6 @@ import score.calculators.*;
 public class VegetableCriteriaFactory implements ICriteriaCalculatorFactory {
     private ArrayList<ICriteriaCalculator> calculators;
 
-    /**
-     * Constructor that accepts a list of calculators.
-     *
-     * @param calculators The list of CriteriaCalculators to use.
-     */
     public VegetableCriteriaFactory(ArrayList<ICriteriaCalculator> calculators) {
         this.calculators = calculators;
     }

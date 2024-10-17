@@ -16,63 +16,33 @@ public class VegetableMostCalculator implements ICriteriaCalculator {
 
     @Override
     public boolean canHandle(String criteriaSegment) {
-        return criteriaSegment.contains("MOST")
-            && criteriaSegment.contains("=")
-            && !criteriaSegment.contains("TOTAL VEGETABLE");
+        return criteriaSegment.contains("MOST") && !criteriaSegment.contains("TOTAL");
     }
 
     @Override
     public int calculate(String criteriaSegment, ArrayList<ICard> hand, IPlayer thisPlayer, ArrayList<IPlayer> players) {
         int score = 0;
-
-        if (criteriaSegment.contains("MOST")) {
-            int vegIndex = criteriaSegment.indexOf("MOST") + 5;
-            String veg = criteriaSegment.substring(vegIndex, criteriaSegment.indexOf("=")).trim();
-            Vegetable vegetable;
-            try {
-                vegetable = Vegetable.valueOf(veg.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid vegetable in criteria: " + veg);
-                return 0;
-            }
-
-            int countVeg = vegetableCounter.countVegetables(hand, vegetable);
-            int maxVeg = countVeg;
-            boolean playerHasMost = true;
-
-            for (IPlayer p : players) {
-                if (p.getPlayerID() != thisPlayer.getPlayerID()) {
-                    int playerVeg = vegetableCounter.countVeget(p.getHand(), vegetable);
-                    if (playerVeg > maxVeg) {
-                        // Another player has more vegetables
-                        playerHas = false;
-                        playerHasMost = false;
-                        break;
-                    } else if (playerVeg == maxVeg) {
-                        // Tie detected
-                        playerHas = false;
-                    }
-                }
-            }
-
-            if (playerHasMost) {
-                score += Integer.parseInt(criteriaSegment.substring(criteriaSegment.indexOf("=") + 1).trim());
-            } else if (!playerHasMost && !playerHas) {
-                // Tie detected, check if player holds the point card
-                boolean playerHoldsPointCard = false;
-                for (ICard card : hand) {
-                    if (card.getCriteriaSideUp() && card.getCriteria().equals(criteriaSegment)) {
-                        playerHoldsPointCard = true;
-                        break;
-                    }
-                }
-                if (playerHoldsPointCard) {
-                    score += Integer.parseInt(criteriaSegment.substring(criteriaSegment.indexOf("=") + 1).trim());
-                }
-            }
-        }
-        return score;
+		int vegIndex = criteriaSegment.indexOf("MOST")+5;
+		String veg = criteriaSegment.substring(vegIndex, criteriaSegment.indexOf("=")).trim();
+		int thisPlayerTotal = vegetableCounter.countVegetables(hand, Vegetable.valueOf(veg));
+		int mostAmount = thisPlayerTotal;
+		
+		for(IPlayer p : players) {
+			if(p.getPlayerID() != thisPlayer.getPlayerID()) {
+				int playerVeg = vegetableCounter.countVegetables(p.getHand(), Vegetable.valueOf(veg));
+				
+				if((criteriaSegment.indexOf("MOST")>=0) && (playerVeg > thisPlayerTotal)) {
+					mostAmount = vegetableCounter.countVegetables(p.getHand(), Vegetable.valueOf(veg));
+				}
+			}
+		}
+		if(thisPlayerTotal == mostAmount) {
+			//System.out.print("ID1/ID2: "+Integer.parseInt(criteria.substring(criteria.indexOf("=")+1).trim()) + " ");
+			score += Integer.parseInt(criteriaSegment.substring(criteriaSegment.indexOf("=")+1).trim());
+		}
+        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
+		return score;
+		
     }
+
 }
-
-

@@ -1,7 +1,6 @@
 package score;
 
 import java.util.ArrayList;
-import java.util.List;
 import card.ICard;
 import player.IPlayer;
 import score.calculators.ICriteriaCalculator;
@@ -23,10 +22,13 @@ public class VegetableScoreCalculator implements IScoreCalculator {
         for (ICard criteriaCard : hand) {
             if (criteriaCard.getCriteriaSideUp()) {
                 String criteria = criteriaCard.getCriteria();
-                List<String> parts = criteriaParser.splitCriteria(criteria);
+                ArrayList<String> parts = criteriaParser.splitCriteria(criteria);
+                //System.out.println("THESE ARE THE EXTRACTED PARTS FROM " + criteria + ": " + parts);
 
                 for (String part : parts) {
                     String trimmedPart = part.trim();
+                    //System.out.println("THESE ARE THE TRIMMED PARTS FROM " + parts + ": " + trimmedPart);
+
 
                     ICriteriaCalculator calculator = calculatorFactory.getCalculator(trimmedPart);
 

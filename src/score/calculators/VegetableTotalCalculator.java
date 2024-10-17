@@ -15,7 +15,7 @@ public class VegetableTotalCalculator implements ICriteriaCalculator{
 
 	@Override
 	public boolean canHandle(String criteriaSegment) {
-	    return criteriaSegment.contains("TOTAL VEGETABLE") && criteriaSegment.contains("=");
+	    return criteriaSegment.contains("TOTAL");
 	}
 
 
@@ -60,7 +60,7 @@ public class VegetableTotalCalculator implements ICriteriaCalculator{
 	            System.out.println("Invalid points value in criteria: " + criteriaSegment);
 	        }
 	    }
-
+        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
 	    return score;
 	}
 }
