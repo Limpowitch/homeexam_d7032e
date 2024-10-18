@@ -6,4 +6,8 @@ public class OfflineBot extends AbstractOffline {
 		super(playerID, isBot);
 	}
 	
+	@Override
+	public void sendMessage(Object message) {
+		
+	}
 } 

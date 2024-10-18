@@ -49,7 +49,9 @@ public abstract class AbstractOffline implements IPlayer{
 	
 	
 	public void sendMessage(Object message) {
-		System.out.println(message);                
+		if (!this.isBot) {
+            System.out.println(message);                
+        }                
 	}
 	public String readMessage() {
 		String word = ""; 
