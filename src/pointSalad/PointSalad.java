@@ -6,6 +6,10 @@
 package pointSalad;
 
 import main.IGame;
+import pointSalad.gameLoop.IGameLoop;
+import pointSalad.gameLoop.PointSaladGameLoop;
+import pointSalad.setup.ISetup;
+import pointSalad.setup.PointSaladSetup;
 
 public class PointSalad implements IGame{
 	

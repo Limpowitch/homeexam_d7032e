@@ -1,4 +1,4 @@
-package pointSalad;
+package pointSalad.gameLoop;
 
 public interface IGameLoop {
 	

@@ -1,4 +1,4 @@
-package pointSalad;
+package pointSalad.setup;
 
 import java.net.ServerSocket;
 import java.util.ArrayList;

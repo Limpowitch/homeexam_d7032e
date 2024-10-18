@@ -1,4 +1,4 @@
-package pointSalad;
+package pointSalad.setup;
 
 import java.io.IOException;
 import java.net.ServerSocket;

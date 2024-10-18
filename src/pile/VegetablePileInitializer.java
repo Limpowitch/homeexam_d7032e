@@ -29,7 +29,7 @@ public class VegetablePileInitializer implements IPileInitializer {
     
     private JSONArray loadCardsFromJson() throws IOException{
     	
-    	try (InputStream fInputStream = new FileInputStream("src/pointSalad/PointSaladManifest.json");
+    	try (InputStream fInputStream = new FileInputStream("src/pointSalad/setup/PointSaladManifest.json");
                 Scanner scanner = new Scanner(fInputStream, "UTF-8").useDelimiter("\\A")) {
 
                 String jsonString = scanner.hasNext() ? scanner.next() : "";
