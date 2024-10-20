@@ -8,11 +8,10 @@ import player.IPlayer;
 
 public class InitializeOnlinePlayers implements IInitializeOnlinePlayers{
 	INetwork pointSalladNetwork;
-	ServerSocket aSocket;
+	ServerSocket serverSocket;
 	
-	public InitializeOnlinePlayers(INetwork pointSalladNetwork, ServerSocket aSocket) {
+	public InitializeOnlinePlayers(INetwork pointSalladNetwork) {
 		this.pointSalladNetwork = pointSalladNetwork;
-		this.aSocket = aSocket;
 	}
 
 	public ArrayList<IPlayer> initializePlayers(int numberPlayers, int numberOfBots, ArrayList<IPlayer> players) throws Exception{
@@ -23,8 +22,13 @@ public class InitializeOnlinePlayers implements IInitializeOnlinePlayers{
             players.add(new OnlineBot(i+1, null, null, null, true, false)); //add a bot    
         }
         
-        pointSalladNetwork.server(numberPlayers, numberOfBots, players, aSocket);
+        this.serverSocket = pointSalladNetwork.server(numberPlayers, numberOfBots, players);
         
 		return players;
 	}
+
+	@Override
+	public ServerSocket getSocket() {
+        return this.serverSocket;
+    }
 }

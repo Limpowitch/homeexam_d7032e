@@ -87,4 +87,15 @@ public class VegetablePile implements IPile {
     public ArrayList<ICard> getCards() {
         return this.cards;
     }
+
+	@Override
+	public int size() {
+		int count = this.cards.size();
+	    for (ICard card : veggieCards) {
+	        if (card != null) {
+	            count++;
+	        }
+	    }
+	    return count;
+	}
 }

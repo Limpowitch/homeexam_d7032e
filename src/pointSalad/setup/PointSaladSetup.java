@@ -35,7 +35,7 @@ import score.parser.ICriteriaParser;
 import view.IView;
 import view.PointSalladView;
 
-public class PointSaladSetup implements ISetup{
+public class PointSaladSetup implements ISetup, AutoCloseable{
 	int numberPlayers = 0;
 	int numberOfBots = 0;
 	public ArrayList<IPlayer> players = new ArrayList<>();
@@ -51,6 +51,8 @@ public class PointSaladSetup implements ISetup{
     private IPileInitializer setVegetablePile;
     private IView pointSalladView;
     private INetwork pointSalladNetwork;
+    
+    private int currentPlayer;
 	
 	public PointSaladSetup(String[] terminalInput) {
 		this.terminalInput = terminalInput;
@@ -83,29 +85,46 @@ public class PointSaladSetup implements ISetup{
     public void initializePlayers() {
     	parseTerminalInput();
     	
+    	if (numberPlayers < 1 || numberPlayers > 6) {
+            throw new IllegalArgumentException("Invalid number of players: " + numberPlayers + ". Must be between 2 and 6.");
+        }
+    	
+    	if (numberOfBots < 0 || numberOfBots > 6) {
+            throw new IllegalArgumentException("Invalid number of bots: " + numberOfBots + ". Must be between 0 and 5.");
+        }
+        
+        if (numberPlayers + numberOfBots > 6 || numberPlayers + numberOfBots < 2) {
+            throw new IllegalArgumentException("Invalid number of players. Number of total players and bots combined must be between 2 and 6");
+        }
+        
+        
+    	
 		if(numberPlayers > 1) {
-			System.out.println("ENTERED ONLINE");
-			IInitializeOnlinePlayers newOnlinePlayers = new InitializeOnlinePlayers(pointSalladNetwork, aSocket);
+			//System.out.println("ENTERED ONLINE");
+			IInitializeOnlinePlayers newOnlinePlayers = new InitializeOnlinePlayers(pointSalladNetwork);
 			try {
 				newOnlinePlayers.initializePlayers(numberPlayers, numberOfBots, players);
-				System.out.println(players);
+				this.aSocket = newOnlinePlayers.getSocket();
+				//System.out.println(players);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 		} else {
-			System.out.println("ENTERED OFFLINE");
+			//System.out.println("ENTERED OFFLINE");
 			IInitializeOfflinePlayers newOfflinePlayers = new InitializeOfflinePlayers();
 			try {
 				this.players = newOfflinePlayers.initializePlayers(numberPlayers, numberOfBots, players);
-				System.out.println(players);
+				//System.out.println(players);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		} 
+		}
 		
+		this.currentPlayer = (int) (Math.random() * (getPlayers().size()));
+
 	}
     
     public void parseTerminalInput() {
@@ -181,5 +200,19 @@ public class PointSaladSetup implements ISetup{
 		return this.vegetableCriteriaFactory;
 	}
 	
+	@Override
+    public void close() {
+		if (aSocket != null && !aSocket.isClosed()) {
+            try {
+                aSocket.close();
+                System.out.println("ServerSocket closed successfully.");
+            } catch (IOException e) {
+                System.err.println("Failed to close ServerSocket:");
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("No ServerSocket to close or it is already closed.");
+        }
+    }
 
 }

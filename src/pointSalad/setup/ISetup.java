@@ -39,5 +39,8 @@ public interface ISetup {
 	
 	public IView getView(); 
 	
-	public INetwork getNetwork(); 
+	public INetwork getNetwork();
+
+	void close(); 
+			
 }

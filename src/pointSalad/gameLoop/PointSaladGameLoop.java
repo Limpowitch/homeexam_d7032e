@@ -1,5 +1,8 @@
 package pointSalad.gameLoop;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+
 import pile.IPile;
 import player.IPlayer;
 import pointSalad.setup.ISetup;
@@ -48,5 +51,8 @@ public class PointSaladGameLoop implements IGameLoop{
 				}
 				
 				finalScore.printFinalScore();
+				
+				//newSaladSetup.close();
+
 			}
 	}

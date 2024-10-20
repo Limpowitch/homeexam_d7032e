@@ -19,4 +19,6 @@ public interface IPile {
 	boolean isEmpty();
 	
 	ICard drawCard();
+
+	int size();
 }

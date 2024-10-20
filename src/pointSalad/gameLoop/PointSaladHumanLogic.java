@@ -1,89 +1,226 @@
 package pointSalad.gameLoop;
 
+import java.util.ArrayList;
 import card.ICard;
+import pile.IPile;
 import player.IPlayer;
 import pointSalad.setup.ISetup;
 
-public class PointSaladHumanLogic implements IHumanLogic{
-	ISetup newSaladSetup;
-	
-	public PointSaladHumanLogic(ISetup newSaladSetup) {
-		this.newSaladSetup = newSaladSetup;
-	}
-	
-	public void humanLogicLoop(IPlayer thisPlayer) {
-		
-			System.out.println("Passed is-bot check");
-			thisPlayer.sendMessage("\n\n****************************************************************\nIt's your turn! Your hand is:\n");
-			thisPlayer.sendMessage(newSaladSetup.getView().displayHand(thisPlayer.getHand()));
-			thisPlayer.sendMessage("\nThe piles are: ");
-		
-			thisPlayer.sendMessage(newSaladSetup.getView().printMarket(newSaladSetup.getPile()));
-			boolean validChoice = false;
-			while(!validChoice) {
-				thisPlayer.sendMessage("\n\nTake either one point card (Syntax example: 2) or up to two vegetable cards (Syntax example: CF).\n");
-				String pileChoice = thisPlayer.readMessage();
-				if(pileChoice.matches("\\d")) {
-					int pileIndex = Integer.parseInt(pileChoice);
-					if(newSaladSetup.getPile().get(pileIndex).getPointCard(newSaladSetup.getPile()) == null) {
-						thisPlayer.sendMessage("\nThis pile is empty. Please choose another pile.\n");
-						continue;
-					} else {
-						thisPlayer.getHand().add(newSaladSetup.getPile().get(pileIndex).buyPointCard(newSaladSetup.getPile()));
-						thisPlayer.sendMessage("\nYou took a card from pile " + (pileIndex) + " and added it to your hand.\n");
-						validChoice = true;
-					}
-				} else {
-					int takenVeggies = 0;
-					for(int charIndex = 0; charIndex < pileChoice.length(); charIndex++) {
-						if(Character.toUpperCase(pileChoice.charAt(charIndex)) < 'A' || Character.toUpperCase(pileChoice.charAt(charIndex)) > 'F') {
-							thisPlayer.sendMessage("\nInvalid choice. Please choose up to two veggie cards from the market.\n");
-							validChoice = false;
-							break;
-						}
-						int choice = Character.toUpperCase(pileChoice.charAt(charIndex)) - 'A';
-						int pileIndex = (choice == 0 || choice == 3) ? 0 : (choice == 1 || choice == 4) ? 1 : (choice == 2 || choice == 5) ? 2:-1;
-						int veggieIndex = (choice == 0 || choice == 1 || choice == 2) ? 0 : (choice == 3 || choice == 4 || choice == 5) ? 1 : -1;
-						if(newSaladSetup.getPile().get(pileIndex).getVeggieCard(veggieIndex) == null) {
-							thisPlayer.sendMessage("\nThis veggie is empty. Please choose another pile.\n");
-							validChoice = false;
-							break;
-						} else {
-							if(takenVeggies == 2) {
-								validChoice = true;
-								break;
-							} else {
-								thisPlayer.getHand().add(newSaladSetup.getPile().get(pileIndex).buyVeggieCard(veggieIndex, newSaladSetup.getPile()));
-								takenVeggies++;
-								//thisPlayer.sendMessage("\nYou took a card from pile " + (pileIndex) + " and added it to your hand.\n");
-								validChoice = true;
-							}
-						}
-					}
-
-				}
-			}
-			//Check if the player has any criteria cards in their hand
-			boolean criteriaCardInHand = false;
-			for(ICard card : thisPlayer.getHand()) {
-				if(card.getCriteriaSideUp()) {
-					criteriaCardInHand = true;
-					break;
-				}
-			}
-			if(criteriaCardInHand) {
-				//Give the player an option to turn a criteria card into a veggie card
-				thisPlayer.sendMessage("\n"+newSaladSetup.getView().displayHand(thisPlayer.getHand())+"\nWould you like to turn a criteria card into a veggie card? (Syntax example: n or 2)");
-				String choice = thisPlayer.readMessage();
-				if(choice.matches("\\d")) {
-					int cardIndex = Integer.parseInt(choice);
-					ICard selectedCard = thisPlayer.getHand().get(cardIndex);
-					selectedCard.setCriteriaSideUp(false);
-				}
-			}
-			thisPlayer.sendMessage("\nYour turn is completed\n****************************************************************\n\n");
-			newSaladSetup.getNetwork().sendToAllPlayers("Player " + thisPlayer.getPlayerID() + "'s hand is now: \n"+newSaladSetup.getView().displayHand(thisPlayer.getHand())+"\n", newSaladSetup.getPlayers());
-		}
-	
-}	
-
+public class PointSaladHumanLogic implements IHumanLogic {
+    private ISetup newSaladSetup;
+    
+    public PointSaladHumanLogic(ISetup newSaladSetup) {
+        this.newSaladSetup = newSaladSetup;
+    }
+    
+    /**
+     * Main loop for handling human player logic during their turn.
+     *
+     * @param thisPlayer The player whose turn it is.
+     */
+    public void humanLogicLoop(IPlayer thisPlayer) {
+        System.out.println("Passed is-bot check");
+        thisPlayer.sendMessage("\n\n****************************************************************\nIt's your turn! Your hand is:\n");
+        thisPlayer.sendMessage(newSaladSetup.getView().displayHand(thisPlayer.getHand()));
+        thisPlayer.sendMessage("\nThe piles are: ");
+        thisPlayer.sendMessage(newSaladSetup.getView().printMarket(newSaladSetup.getPile()));
+        
+        boolean validChoice = false;
+        while (!validChoice) {
+            thisPlayer.sendMessage("\n\nTake either one point card (Syntax example: 2) or up to two vegetable cards (Syntax example: CF).\n");
+            String pileChoice = thisPlayer.readMessage().trim();
+            
+            if (pileChoice.matches("\\d")) {
+                // User chose to take a point card
+                validChoice = takePointCard(thisPlayer, pileChoice);
+            } else {
+                // User chose to take veggie cards
+                validChoice = takeVeggieCards(thisPlayer, pileChoice);
+            }
+        }
+        
+        // After taking cards, check for criteria cards
+        checkAndConvertCriteriaCards(thisPlayer);
+        
+        // Notify all players about the current state
+        thisPlayer.sendMessage("\nYour turn is completed\n****************************************************************\n\n");
+        newSaladSetup.getNetwork().sendToAllPlayers(
+            "Player " + thisPlayer.getPlayerID() + "'s hand is now: \n" 
+            + newSaladSetup.getView().displayHand(thisPlayer.getHand()) + "\n", 
+            newSaladSetup.getPlayers()
+        );
+    }
+    
+    /**
+     * Handles the logic for taking a point card from a specified pile.
+     *
+     * @param thisPlayer The player taking the point card.
+     * @param pileChoice The pile index chosen by the player as a string.
+     * @return True if the choice was valid and the card was taken; False otherwise.
+     */
+    public boolean takePointCard(IPlayer thisPlayer, String pileChoice) {
+        int pileIndex;
+        try {
+            pileIndex = Integer.parseInt(pileChoice);
+        } catch (NumberFormatException e) {
+            thisPlayer.sendMessage("\nInvalid input. Please enter a valid pile number.\n");
+            return false;
+        }
+        
+        // Validate pile index
+        if (pileIndex < 0 || pileIndex >= newSaladSetup.getPile().size()) {
+            thisPlayer.sendMessage("\nPile number out of range. Please choose a valid pile.\n");
+            return false;
+        }
+        
+        IPile selectedPile = newSaladSetup.getPile().get(pileIndex);
+        ICard pointCard = selectedPile.getPointCard(newSaladSetup.getPile());
+        
+        if (pointCard == null) {
+            thisPlayer.sendMessage("\nThis pile is empty. Please choose another pile.\n");
+            return false;
+        } else {
+            ICard boughtPointCard = selectedPile.buyPointCard(newSaladSetup.getPile());
+            thisPlayer.getHand().add(boughtPointCard);
+            //thisPlayer.sendMessage("\nYou took a point card from pile " + pileIndex + " and added it to your hand.\n");
+            return true;
+        }
+    }
+    
+    /**
+     * Handles the logic for taking up to two veggie cards based on user input.
+     *
+     * @param thisPlayer The player taking the veggie cards.
+     * @param pileChoice The string input representing the veggie cards to take (e.g., "CF").
+     * @return True if the choices were valid and the cards were taken; False otherwise.
+     */
+    public boolean takeVeggieCards(IPlayer thisPlayer, String pileChoice) {
+        if (pileChoice.length() == 0 || pileChoice.length() > 2) {
+            thisPlayer.sendMessage("\nInvalid input. Please enter up to two veggie card identifiers (e.g., CF).\n");
+            return false;
+        }
+        
+        int takenVeggies = 0;
+        for (int charIndex = 0; charIndex < pileChoice.length(); charIndex++) {
+            char selectedChar = Character.toUpperCase(pileChoice.charAt(charIndex));
+            
+            // Validate character range
+            if (selectedChar < 'A' || selectedChar > 'F') {
+                thisPlayer.sendMessage("\nInvalid choice '" + selectedChar + "'. Please choose valid veggie cards (A-F).\n");
+                return false;
+            }
+            
+            int choice = selectedChar - 'A';
+            int pileIndex = mapCharToPileIndex(choice);
+            int veggieIndex = mapCharToVeggieIndex(choice);
+            
+            // Validate pile and veggie indices
+            if (pileIndex == -1 || veggieIndex == -1) {
+                thisPlayer.sendMessage("\nInvalid choice '" + selectedChar + "'. Unable to map to a valid pile or veggie index.\n");
+                return false;
+            }
+            
+            IPile selectedPile = newSaladSetup.getPile().get(pileIndex);
+            ICard veggieCard = selectedPile.getVeggieCard(veggieIndex);
+            
+            if (veggieCard == null) {
+                thisPlayer.sendMessage("\nThis veggie is empty. Please choose another veggie card.\n");
+                return false;
+            } else {
+                if (takenVeggies == 2) {
+                    thisPlayer.sendMessage("\nYou can only take up to two veggie cards.\n");
+                    break;
+                }
+                
+                ICard boughtVeggieCard = selectedPile.buyVeggieCard(veggieIndex, newSaladSetup.getPile());
+                thisPlayer.getHand().add(boughtVeggieCard);
+                takenVeggies++;
+                //thisPlayer.sendMessage("\nYou took a veggie card '" + selectedChar + "' from pile " + pileIndex + " and added it to your hand.\n");
+            }
+        }
+        
+        return takenVeggies > 0;
+    }
+    
+    /**
+     * Checks if the player has any criteria cards in their hand and offers the option to convert one into a veggie card.
+     *
+     * @param thisPlayer The player whose hand is being checked.
+     */
+    public void checkAndConvertCriteriaCards(IPlayer thisPlayer) {
+        ArrayList<ICard> playerHand = thisPlayer.getHand();
+        boolean criteriaCardInHand = false;
+        ArrayList<Integer> criteriaCardIndices = new ArrayList<>();
+        
+        // Identify criteria cards in hand
+        for (int i = 0; i < playerHand.size(); i++) {
+            ICard card = playerHand.get(i);
+            if (card.getCriteriaSideUp()) {
+                criteriaCardInHand = true;
+                criteriaCardIndices.add(i);
+            }
+        }
+        
+        if (criteriaCardInHand) {
+            thisPlayer.sendMessage("\n" + newSaladSetup.getView().displayHand(playerHand) + "\nWould you like to turn a criteria card into a veggie card? (Enter the card number or 'n' to skip)");
+            String choice = thisPlayer.readMessage().trim();
+            
+            if (choice.equalsIgnoreCase("n")) {
+                thisPlayer.sendMessage("\nYou chose not to turn any criteria card into a veggie card.\n");
+                return;
+            }
+            
+            if (choice.matches("\\d+")) {
+                int cardIndex;
+                try {
+                    cardIndex = Integer.parseInt(choice);
+                } catch (NumberFormatException e) {
+                    thisPlayer.sendMessage("\nInvalid input. Please enter a valid card number or 'n' to skip.\n");
+                    return;
+                }
+                
+                if (cardIndex < 0 || cardIndex >= playerHand.size()) {
+                    thisPlayer.sendMessage("\nCard number out of range. Please choose a valid card number.\n");
+                    return;
+                }
+                
+                ICard selectedCard = playerHand.get(cardIndex);
+                if (!selectedCard.getCriteriaSideUp()) {
+                    thisPlayer.sendMessage("\nSelected card is not a criteria card. Please choose a valid criteria card.\n");
+                    return;
+                }
+                
+                // Convert criteria card to veggie card
+                selectedCard.setCriteriaSideUp(false);
+                thisPlayer.sendMessage("\nYou have successfully turned criteria card #" + cardIndex + " into a veggie card.\n");
+            } else {
+                thisPlayer.sendMessage("\nInvalid input. Please enter a valid card number or 'n' to skip.\n");
+            }
+        }
+    }
+    
+    /**
+     * Maps a character choice to the corresponding pile index.
+     *
+     * @param choice The numerical representation of the character (0 for 'A', 1 for 'B', etc.).
+     * @return The pile index or -1 if invalid.
+     */
+    private int mapCharToPileIndex(int choice) {
+        return (choice == 0 || choice == 3) ? 0 
+             : (choice == 1 || choice == 4) ? 1 
+             : (choice == 2 || choice == 5) ? 2 
+             : -1;
+    }
+    
+    /**
+     * Maps a character choice to the corresponding veggie index within the pile.
+     *
+     * @param choice The numerical representation of the character (0 for 'A', 1 for 'B', etc.).
+     * @return The veggie index or -1 if invalid.
+     */
+    private int mapCharToVeggieIndex(int choice) {
+        return (choice >= 0 && choice <= 2) ? 0 
+             : (choice >= 3 && choice <= 5) ? 1 
+             : -1;
+    }
+}

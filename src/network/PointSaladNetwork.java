@@ -43,25 +43,32 @@ public class PointSaladNetwork implements INetwork{
         }
     }
 
-    public void server(int numberPlayers, int numberOfBots, ArrayList<IPlayer> players, ServerSocket aSocket) throws Exception {
-    	if(numberPlayers>1)
-    		try {
-    			aSocket = new ServerSocket(2048);
-    			System.out.println("Created socket: " + aSocket);
-    		} catch (BindException e){
-    			System.out.println( e );
-    			aSocket.close();
-    		}
-           
-    		//System.out.println("Created socket: " + aSocket);
-        for(int i=numberOfBots+1; i<numberPlayers+numberOfBots; i++) {
+	public ServerSocket server(int numberPlayers, int numberOfBots, ArrayList<IPlayer> players) throws Exception {
+        ServerSocket aSocket = null;
+        if(numberPlayers > 1) {
+            try {
+                aSocket = new ServerSocket(2048);
+                System.out.println("Created socket: " + aSocket);
+            } catch (BindException e){
+                System.out.println("BindException: " + e.getMessage());
+                if (aSocket != null && !aSocket.isClosed()) {
+                    aSocket.close();
+                }
+                throw e; // Re-throw to handle elsewhere
+            }
+        }
+
+        // Accept connections
+        for(int i = numberOfBots + 1; i < numberPlayers + numberOfBots; i++) {
             Socket connectionSocket = aSocket.accept();
             ObjectInputStream inFromClient = new ObjectInputStream(connectionSocket.getInputStream());
             ObjectOutputStream outToClient = new ObjectOutputStream(connectionSocket.getOutputStream());
-            players.add(new OnlineHuman(i, connectionSocket, inFromClient, outToClient, false, true)); //add an online client
+            players.add(new OnlineHuman(i, connectionSocket, inFromClient, outToClient, false, true)); // Add an online client
             System.out.println("Connected to player " + i);
             outToClient.writeObject("You connected to the server as player " + i + "\n");
         }    
+
+        return aSocket; // Return the created ServerSocket
     }    
     
 	

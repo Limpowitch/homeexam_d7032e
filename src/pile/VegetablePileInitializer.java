@@ -76,8 +76,8 @@ public class VegetablePileInitializer implements IPileInitializer {
     
     private ArrayList<ICard> buildMainDeck(int nrPlayers, ArrayList<ArrayList<ICard>> decks){
     	ArrayList<ICard> mainDeck = new ArrayList<>();
-
-        int cardsPerVeggie = nrPlayers / 2 * 6;
+    	
+    	int cardsPerVeggie = (int) ((double) nrPlayers / 2.0 * 6);
 
         for (ArrayList<ICard> deck : decks) {
             cardsPerVeggie = Math.min(cardsPerVeggie, deck.size());
@@ -108,8 +108,10 @@ public class VegetablePileInitializer implements IPileInitializer {
         }
         
         for (ArrayList<ICard> pile : pilesList) {
-            piles.add(new VegetablePile(pile, pileCoordinator));
+        	ArrayList<ICard> pileCopy = new ArrayList<>(pile);
+            piles.add(new VegetablePile(pileCopy, pileCoordinator));
         }
+        
     }
 
     public void shuffleDeck(ArrayList<ICard> deck) {
