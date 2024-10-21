@@ -42,6 +42,7 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
 	public ArrayList<IPile> piles = new ArrayList<>();
     public ServerSocket aSocket;
 	String[] terminalInput;
+	private int currentPlayer;
 	
 	private ICounter vegetableCounter;
     private ICriteriaParser vegetableCriteriaParser;
@@ -52,7 +53,7 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
     private IView pointSalladView;
     private INetwork pointSalladNetwork;
     
-    private int currentPlayer;
+    
 	
 	public PointSaladSetup(String[] terminalInput) {
 		this.terminalInput = terminalInput;

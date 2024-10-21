@@ -13,6 +13,9 @@ import score.calculators.ICriteriaCalculator;
 import score.parser.ICriteriaParser;
 import view.IView;
 
+/**
+ * A interface for all methods required to setup the game
+ */
 public interface ISetup {
 
 	void gameInitializer();
