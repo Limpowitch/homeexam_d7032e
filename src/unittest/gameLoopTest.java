@@ -19,11 +19,11 @@ import pointSalad.gameLoop.bot.PointSaladBotLogic;
 import pointSalad.gameLoop.bot.ShowBotHand;
 import pointSalad.gameLoop.human.IHumanLogic;
 import pointSalad.gameLoop.human.PointSaladHumanLogic;
-import pointSalad.setup.PointSaladSetup;
+import pointSalad.state.PointSaladState;
 
 class gameLoopTest {
 	
-private PointSaladSetup setup;
+private PointSaladState setup;
 	
 	@AfterEach
     void tearDown() {
@@ -47,10 +47,8 @@ private PointSaladSetup setup;
     void testVeggieDraft(int numberPlayers, int numberOfBots) {
         String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
            
-        // Initialize the game setup
-        setup = new PointSaladSetup(args);
+        setup = new PointSaladState(args);
         
-        // Retrieve players and piles from the setup
         ArrayList<IPlayer> players = setup.getPlayers();
         ArrayList<IPile> piles = setup.getPile();
         
@@ -58,18 +56,15 @@ private PointSaladSetup setup;
         
         
         
-        // Iterate through each player to verify their hand
         for (IPlayer player : players) {
         	newBotLogic.takeCards(player);
         	
             ArrayList<ICard> hand = player.getHand();
             
-            // Count veggie cards (getCriteriaSideUp() == false)
             long veggieCardCount = hand.stream()
                                         .filter(card -> !card.getCriteriaSideUp())
                                         .count();
             
-            // Assert that the veggieCardCount is not odd
             boolean veggieCardCountIsEven = (veggieCardCount == 2);
             assertTrue(veggieCardCountIsEven, 
                 "Player " + player.getPlayerID() + " has an odd number of veggie cards: " + veggieCardCount);
@@ -93,14 +88,13 @@ private PointSaladSetup setup;
     void testPointDraft(int numberPlayers, int numberOfBots) {
         String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
            
-        setup = new PointSaladSetup(args);
+        setup = new PointSaladState(args);
         
         ArrayList<IPlayer> players = setup.getPlayers();	    
         	        
         IBotLogic newBotLogic = new PointSaladBotLogic(setup);
         
         
-        // Iterate through each player to verify their hand
         for (IPlayer player : players) {
         	newBotLogic.takePointCard(player);
         	
@@ -131,7 +125,7 @@ private PointSaladSetup setup;
 	 void turnPointCard(int numberPlayers, int numberOfBots) {
 	 	String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
      
-        setup = new PointSaladSetup(args);
+        setup = new PointSaladState(args);
         
         ArrayList<IPlayer> players = setup.getPlayers();	
         
@@ -178,7 +172,7 @@ private PointSaladSetup setup;
 	 void testShowHand(int numberPlayers, int numberOfBots) {
 	 	String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
          
-        setup = new PointSaladSetup(args);
+        setup = new PointSaladState(args);
         
         ArrayList<IPlayer> players = setup.getPlayers();	   
         
@@ -186,7 +180,7 @@ private PointSaladSetup setup;
         IShowHand showBotHand = new ShowBotHand(setup);
         
         boolean passed = true;
-        // Iterate through each player to verify their hand
+        
         for (IPlayer player : players) {
         	newBotLogic.takeCards(player);
         	
@@ -218,7 +212,7 @@ private PointSaladSetup setup;
 		 
 		String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
          
-        setup = new PointSaladSetup(args);
+        setup = new PointSaladState(args);
         
         ArrayList<IPlayer> players = setup.getPlayers();
         
@@ -271,7 +265,7 @@ private PointSaladSetup setup;
 	 void testRefillBiggestPile(int numberPlayers, int numberOfBots) {
 		 	String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
          
-	        setup = new PointSaladSetup(args);
+	        setup = new PointSaladState(args);
 	        
 	        ArrayList<IPlayer> players = setup.getPlayers();
 	        
@@ -333,7 +327,7 @@ private PointSaladSetup setup;
 	 void testFullCardTaking(int numberPlayers, int numberOfBots) {
 		 String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
          
-	        setup = new PointSaladSetup(args);
+	        setup = new PointSaladState(args);
 	        
 	        ArrayList<IPlayer> players = setup.getPlayers();
 	        
@@ -384,7 +378,7 @@ private PointSaladSetup setup;
 	 void testScoreCalculation(int numberPlayers, int numberOfBots) {
 		 String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
          
-	        setup = new PointSaladSetup(args);
+	        setup = new PointSaladState(args);
 	        
 	        ArrayList<IPlayer> players = setup.getPlayers();
 	        

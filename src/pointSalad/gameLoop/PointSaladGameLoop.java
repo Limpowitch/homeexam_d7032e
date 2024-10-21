@@ -6,29 +6,26 @@ import pointSalad.gameLoop.bot.IBotLogic;
 import pointSalad.gameLoop.bot.PointSaladBotLogic;
 import pointSalad.gameLoop.human.IHumanLogic;
 import pointSalad.gameLoop.human.PointSaladHumanLogic;
-import pointSalad.setup.ISetup;
+import pointSalad.state.IState;
 
 public class PointSaladGameLoop implements IGameLoop{
-	ISetup newSaladSetup;
+	IState saladState;
 	
-	public PointSaladGameLoop(ISetup newSaladSetup) {
-		this.newSaladSetup = newSaladSetup;
+	public PointSaladGameLoop(IState saladState) {
+		this.saladState = saladState;
 	}
 	
 	public void gameLoop() {
-				// Set random starting player
-		
-				System.out.println("Entered gameloop");
-				int currentPlayer = (int) (Math.random() * (newSaladSetup.getPlayers().size()));
+				int currentPlayer = (int) (Math.random() * (saladState.getPlayers().size())); // Set random starting player
 				boolean keepPlaying = true;
-				IHumanLogic humanLogic = new PointSaladHumanLogic(newSaladSetup);
-				IBotLogic botLogic = new PointSaladBotLogic(newSaladSetup);
-				IFinalScore finalScore = new FinalScoreCalculator(newSaladSetup);
+				IHumanLogic humanLogic = new PointSaladHumanLogic(saladState);
+				IBotLogic botLogic = new PointSaladBotLogic(saladState);
+				IFinalScore finalScore = new FinalScoreCalculator(saladState);
 
 				while(keepPlaying) {
-					IPlayer thisPlayer = newSaladSetup.getPlayers().get(currentPlayer);
+					IPlayer thisPlayer = saladState.getPlayers().get(currentPlayer);
 					boolean stillAvailableCards = false;
-					for(IPile p: newSaladSetup.getPile()) {
+					for(IPile p: saladState.getPile()) {
 						if(!p.isEmpty()) {
 							stillAvailableCards = true;
 							break;
@@ -48,7 +45,7 @@ public class PointSaladGameLoop implements IGameLoop{
 					
 					
 					
-					if(currentPlayer == newSaladSetup.getPlayers().size()-1) {
+					if(currentPlayer == saladState.getPlayers().size()-1) {
 						currentPlayer = 0;
 					} else {
 						currentPlayer++;
@@ -57,8 +54,7 @@ public class PointSaladGameLoop implements IGameLoop{
 				
 				finalScore.printFinalScore();
 				
-				//newSaladSetup.close();
-
+				saladState.close(); // Close online socket
 	}
 	
 	

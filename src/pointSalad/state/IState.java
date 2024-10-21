@@ -1,4 +1,4 @@
-package pointSalad.setup;
+package pointSalad.state;
 
 import java.net.ServerSocket;
 import java.util.ArrayList;
@@ -14,15 +14,9 @@ import score.parser.ICriteriaParser;
 import view.IView;
 
 /**
- * A interface for all methods required to setup the game
+ * A interface for all methods required to manage game state
  */
-public interface ISetup {
-
-	void gameInitializer();
-	
-	public void initializePlayers();
-	
-	public void parseTerminalInput();
+public interface IState {
 	
 	public ArrayList<IPlayer> getPlayers();
 	

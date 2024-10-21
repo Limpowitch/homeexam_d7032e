@@ -16,8 +16,8 @@ public class VegetablePile implements IPile {
         this.pileCoordinator = pileCoordinator;
         this.veggieCards[0] = cards.remove(0);
         this.veggieCards[1] = cards.remove(0);    
-        this.veggieCards[0].setCriteriaSideUp(false);
-        this.veggieCards[1].setCriteriaSideUp(false);
+        this.veggieCards[0].setCriteriaSideUp(false); // Turns one pointcard into veggiecard
+        this.veggieCards[1].setCriteriaSideUp(false); // Turns another pointcard into veggiecard
     }
 
     public ICard getPointCard(ArrayList<IPile> piles) {

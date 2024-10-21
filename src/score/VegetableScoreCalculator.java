@@ -22,20 +22,20 @@ public class VegetableScoreCalculator implements IScoreCalculator {
         for (ICard criteriaCard : hand) {
             if (criteriaCard.getCriteriaSideUp()) {
                 String criteria = criteriaCard.getCriteria();
-                ArrayList<String> parts = criteriaParser.splitCriteria(criteria);
-                //System.out.println("THESE ARE THE EXTRACTED PARTS FROM " + criteria + ": " + parts);
+                ArrayList<String> parsedCriteria = criteriaParser.splitCriteria(criteria); 
 
-                for (String part : parts) {
+                for (String part : parsedCriteria) {
                     String trimmedPart = part.trim();
-                    //System.out.println("THESE ARE THE TRIMMED PARTS FROM " + parts + ": " + trimmedPart);
 
+                    ICriteriaCalculator calculator = calculatorFactory.getCalculator(trimmedPart); //Retrieves the correct calculator for the given criteria
 
-                    ICriteriaCalculator calculator = calculatorFactory.getCalculator(trimmedPart);
-
-                    if (calculator != null) {
-                        totalScore += calculator.calculate(trimmedPart, hand, thisPlayer, players);
-                    } else {
-                        System.out.println("Unknown operator or keyword in criteria: " + trimmedPart);
+                    try {
+                        if (calculator == null) {
+                            throw new IllegalArgumentException("Unknown operator or keyword in criteria: " + trimmedPart);
+                        }
+                        totalScore += calculator.calculate(trimmedPart, hand, thisPlayer, players); //Calculates the score for the given pointcard
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
                     }
                 }
             }

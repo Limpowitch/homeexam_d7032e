@@ -3,9 +3,9 @@ package score.calculators;
 import java.util.ArrayList;
 
 import card.ICard;
-import card.Vegetable;
 import counter.ICounter;
 import player.IPlayer;
+import pointSalad.state.VegetableTypes;
 
 public class VegetableSetCalculator implements ICriteriaCalculator{
 	private ICounter vegetableCounter;
@@ -26,7 +26,7 @@ public class VegetableSetCalculator implements ICriteriaCalculator{
         if (criteriaSegment.contains("SET")) {
             int addScore = 12; 
             
-            for (Vegetable vegetable : Vegetable.values()) {
+            for (VegetableTypes vegetable : VegetableTypes.values()) {
                 int countVeg = vegetableCounter.countVegetables(hand, vegetable);
                 if (countVeg == 0) {
                     addScore = 0; 
@@ -35,7 +35,6 @@ public class VegetableSetCalculator implements ICriteriaCalculator{
             }
             score += addScore;
         }
-        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
         return score;
     }
 }

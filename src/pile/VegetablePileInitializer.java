@@ -11,12 +11,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import card.ICard;
-import card.Vegetable;
 import card.VegetableCard;
+import pointSalad.state.VegetableTypes;
 
 public class VegetablePileInitializer implements IPileInitializer {
 	private static final int NUMBER_OF_PILES = 3;
-    Vegetable[] vegetables = Vegetable.values();
+    VegetableTypes[] vegetables = VegetableTypes.values();
     private final IPileCoordinator pileCoordinator = new VegetablePileCoordinator();
 
 	
@@ -29,7 +29,7 @@ public class VegetablePileInitializer implements IPileInitializer {
     
     private JSONArray loadCardsFromJson() throws IOException{
     	
-    	try (InputStream fInputStream = new FileInputStream("src/pointSalad/setup/PointSaladManifest.json");
+    	try (InputStream fInputStream = new FileInputStream("src/pointSalad/state/PointSaladManifest.json");
                 Scanner scanner = new Scanner(fInputStream, "UTF-8").useDelimiter("\\A")) {
 
                 String jsonString = scanner.hasNext() ? scanner.next() : "";
@@ -46,7 +46,7 @@ public class VegetablePileInitializer implements IPileInitializer {
     	}
     }
     
-    private ArrayList<ArrayList<ICard>> createDecks(Vegetable[] vegetables, JSONArray cardsArray) {
+    private ArrayList<ArrayList<ICard>> createDecks(VegetableTypes[] vegetables, JSONArray cardsArray) {
     	ArrayList<ArrayList<ICard>> decks = new ArrayList<>();
     	
     	for (int i = 0; i < vegetables.length; i++) {
@@ -59,7 +59,7 @@ public class VegetablePileInitializer implements IPileInitializer {
             JSONObject criteriaObj = cardJson.getJSONObject("criteria");
 
             for (int j = 0; j < vegetables.length; j++) {
-                Vegetable vegetable = vegetables[j];
+                VegetableTypes vegetable = vegetables[j];
                 String vegetableName = vegetable.name(); 
                 String criteria = criteriaObj.getString(vegetableName);
 
@@ -114,7 +114,7 @@ public class VegetablePileInitializer implements IPileInitializer {
         
     }
 
-    public void shuffleDeck(ArrayList<ICard> deck) {
+    private void shuffleDeck(ArrayList<ICard> deck) {
         Collections.shuffle(deck);
     }
 }

@@ -2,9 +2,9 @@ package score.calculators;
 
 import java.util.ArrayList;
 import card.ICard;
-import card.Vegetable;
 import counter.ICounter;
 import player.IPlayer;
+import pointSalad.state.VegetableTypes;
 
 public class VegetableParityCalculator implements ICriteriaCalculator {
     private ICounter vegetableCounter;
@@ -15,7 +15,6 @@ public class VegetableParityCalculator implements ICriteriaCalculator {
 
     @Override
     public boolean canHandle(String criteriaSegment) {
-        // Check if criteriaSegment contains EVEN or ODD
         return criteriaSegment.contains("EVEN") && criteriaSegment.contains("ODD");
     }
 
@@ -24,10 +23,8 @@ public class VegetableParityCalculator implements ICriteriaCalculator {
 		int score = 0;
     	
     	String veg = criteriaSegment.substring(0, criteriaSegment.indexOf(":"));
-		int countVeg = vegetableCounter.countVegetables(hand, Vegetable.valueOf(veg));
-		//System.out.print("ID3: "+((countVeg%2==0)?7:3) + " ");
+		int countVeg = vegetableCounter.countVegetables(hand, VegetableTypes.valueOf(veg));
 		score += (countVeg%2==0)?7:3;
-        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
 		return score;
     }
 }

@@ -7,11 +7,14 @@ import java.util.Scanner;
 import card.ICard;
 import player.IPlayer;
 
+/**
+ * Represents an generic offline player with common methods and fields
+ */
 public abstract class AbstractOffline implements IPlayer{
-	public int playerID;
-	public ArrayList<ICard> hand = new ArrayList<ICard>();
-	public int score = 0;
-	public boolean isBot;
+	private int playerID;
+	private ArrayList<ICard> hand = new ArrayList<ICard>();
+	private int score = 0;
+	private boolean isBot;
 	Scanner in = new Scanner(System.in);
 	
 	public AbstractOffline(int playerID, boolean isBot) {

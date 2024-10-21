@@ -2,13 +2,15 @@
 
 package card;
 
+import pointSalad.state.VegetableTypes;
+
 public class VegetableCard implements ICard{
 
-	private Vegetable vegetable;
+	private VegetableTypes vegetable;
 	private String criteria;
-	private boolean criteriaSideUp = true;
+	private boolean criteriaSideUp = true; //If true, then it's a pointcard.
 
-	public VegetableCard(Vegetable vegetable, String criteria) {
+	public VegetableCard(VegetableTypes vegetable, String criteria) {
 		this.vegetable = vegetable;
 		this.criteria = criteria;
 	}
@@ -26,13 +28,12 @@ public class VegetableCard implements ICard{
 		return this.criteriaSideUp;
 	}
 	
-	public Vegetable getVegetable() {
+	public VegetableTypes getVegetable() {
 		return this.vegetable;
 	}
 
 	@Override
 	public String getCriteria() {
-		// TODO Auto-generated method stub
 		return this.criteria;
 	}
 	

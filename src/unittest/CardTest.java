@@ -13,13 +13,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import card.ICard;
 import pile.IPile;
 import player.IPlayer;
-import pointSalad.setup.PointSaladSetup;
 import pointSalad.gameLoop.*;
+import pointSalad.state.PointSaladState;
 
 
 class CardTest {
 	
-    private PointSaladSetup setup;
+    private PointSaladState setup;
 	
 	@AfterEach
     void tearDown() {
@@ -43,7 +43,7 @@ class CardTest {
 	void testPileSize(int numberPlayers, int numberOfBots) {
 		String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
 		
-		setup = new PointSaladSetup(args);
+		setup = new PointSaladState(args);
 		
 		ArrayList<IPile> pile = setup.getPile();
 		
@@ -54,9 +54,6 @@ class CardTest {
 		for (int i = 0; i < pile.size(); i++) {
 			pileSize += pile.get(i).size();
 		}
-		
-		//System.out.println(pileSize);
-		//System.out.println(expectedTotal);
 		
 		assertEquals(expectedTotal, pileSize);
 	}
@@ -76,7 +73,7 @@ class CardTest {
 	void testEqualPointPileSize(int numberPlayers, int numberOfBots) {
 	 	String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
 			
-		setup = new PointSaladSetup(args);
+		setup = new PointSaladState(args);
 		
 		ArrayList<IPile> pile = setup.getPile();
 		
@@ -112,7 +109,7 @@ class CardTest {
 	void testVegetableMarket(int numberPlayers, int numberOfBots) {
 		String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
 			
-		setup = new PointSaladSetup(args);
+		setup = new PointSaladState(args);
 		
 		ArrayList<IPile> pile = setup.getPile();
 		

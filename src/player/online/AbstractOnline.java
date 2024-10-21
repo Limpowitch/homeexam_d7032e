@@ -2,21 +2,33 @@ package player.online;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 import card.ICard;
 import player.IPlayer;
 
+/**
+ * Represents an generic online player with common methods and fields
+ */
 public abstract class AbstractOnline implements IPlayer{
-	public int playerID;
-	public ArrayList<ICard> hand = new ArrayList<ICard>();
-	public int score = 0;
-	public boolean isBot;
-	public boolean online;
+	private int playerID;
+	private ArrayList<ICard> hand = new ArrayList<ICard>();
+	private int score = 0;
+	private boolean isBot;
+	private boolean online;
 	Scanner in = new Scanner(System.in);
-	public ObjectInputStream inFromClient;
-	public ObjectOutputStream outToClient;
+	private ObjectInputStream inFromClient;
+	private ObjectOutputStream outToClient;
+	
+	public AbstractOnline(int playerID , ObjectInputStream inFromClient, ObjectOutputStream outToClient, boolean isBot, boolean online) {
+		this.playerID = playerID; 
+		this.inFromClient = inFromClient; 
+		this.outToClient = outToClient; 
+		this.isBot = isBot;
+		this.online = online;
+	}
 	
 	public int getPlayerID() {
 		// TODO Auto-generated method stub

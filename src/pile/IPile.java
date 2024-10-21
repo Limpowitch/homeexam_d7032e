@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import card.ICard;
 
+/**
+ * Interface for managing one specific pile
+ */
 public interface IPile {
 	
 	ICard getPointCard(ArrayList<IPile> piles);

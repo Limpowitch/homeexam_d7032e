@@ -16,11 +16,11 @@ public class InitializeOfflinePlayers implements IInitializeOfflinePlayers{
 
 	public ArrayList<IPlayer> initializePlayers(int numberPlayers, int numberOfBots, ArrayList<IPlayer> players) throws Exception{
 		if(numberPlayers == 1) {
-			players.add(new OfflineHuman(0, false)); //add this instance as a player
+			players.add(new OfflineHuman(0, false)); 
 		}
         
         for(int i=0; i<numberOfBots; i++) {
-            players.add(new OfflineBot(i+1, true)); //add a bot    
+            players.add(new OfflineBot(i+1, true)); 
         }
       
 		return players;

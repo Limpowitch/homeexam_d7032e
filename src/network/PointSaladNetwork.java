@@ -51,9 +51,6 @@ public class PointSaladNetwork implements INetwork{
                 System.out.println("Created socket: " + aSocket);
             } catch (BindException e){
                 System.out.println("BindException: " + e.getMessage());
-                if (aSocket != null && !aSocket.isClosed()) {
-                    aSocket.close();
-                }
                 throw e; // Re-throw to handle elsewhere
             }
         }

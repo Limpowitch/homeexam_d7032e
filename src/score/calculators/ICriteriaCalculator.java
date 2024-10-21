@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import card.ICard;
 import player.IPlayer;
 
+/**
+ * Interface for a point-calculator with a specific criteria 
+ */
 public interface ICriteriaCalculator {
 
 	boolean canHandle(String criteriaSegment);

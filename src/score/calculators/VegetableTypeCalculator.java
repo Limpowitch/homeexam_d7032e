@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import card.ICard;
-import card.Vegetable;
 import counter.ICounter;
 import player.IPlayer;
+import pointSalad.state.VegetableTypes;
 
 public class VegetableTypeCalculator implements ICriteriaCalculator {
     private ICounter vegetableCounter;
@@ -30,7 +30,7 @@ public class VegetableTypeCalculator implements ICriteriaCalculator {
 
         if(conditionPart.contains("MISSING")) {
         	int missing = 0;
-        	for (Vegetable vegetable : Vegetable.values()) {
+        	for (VegetableTypes vegetable : VegetableTypes.values()) {
         		if(vegetableCounter.countVegetables(hand, vegetable) == 0) {
         			missing++;
         		}
@@ -40,7 +40,7 @@ public class VegetableTypeCalculator implements ICriteriaCalculator {
         } else {
         	int atLeastPerVegType = Integer.parseInt(conditionPart.substring(conditionPart.indexOf(">=")+2).trim());
 			int totalType = 0;
-			for(Vegetable vegetable : Vegetable.values()) {
+			for(VegetableTypes vegetable : VegetableTypes.values()) {
 				int countVeg = vegetableCounter.countVegetables(hand, vegetable);
 				if(countVeg >= atLeastPerVegType) {
 					totalType++;
@@ -50,7 +50,6 @@ public class VegetableTypeCalculator implements ICriteriaCalculator {
 			score += totalType * points;
         }
         
-        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
     	return score;
 
     }

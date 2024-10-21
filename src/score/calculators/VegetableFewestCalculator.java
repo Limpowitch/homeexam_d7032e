@@ -3,9 +3,9 @@ package score.calculators;
 import java.util.ArrayList;
 
 import card.ICard;
-import card.Vegetable;
 import counter.ICounter;
 import player.IPlayer;
+import pointSalad.state.VegetableTypes;
 
 public class VegetableFewestCalculator implements ICriteriaCalculator{
 	private ICounter vegetableCounter;
@@ -24,7 +24,7 @@ public class VegetableFewestCalculator implements ICriteriaCalculator{
         int score = 0;
         int vegIndex = criteriaSegment.indexOf("FEWEST") + 7; 
         String veg = criteriaSegment.substring(vegIndex, criteriaSegment.indexOf("=")).trim(); 
-        Vegetable vegetable = Vegetable.valueOf(veg.toUpperCase());
+        VegetableTypes vegetable = VegetableTypes.valueOf(veg.toUpperCase());
         int thisPlayerTotal = vegetableCounter.countVegetables(hand, vegetable);
         int fewestAmount = thisPlayerTotal;
 
@@ -43,7 +43,6 @@ public class VegetableFewestCalculator implements ICriteriaCalculator{
             score += Integer.parseInt(criteriaSegment.substring(criteriaSegment.indexOf("=") + 1).trim());
         }
         
-        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
         return score;
     }
 }

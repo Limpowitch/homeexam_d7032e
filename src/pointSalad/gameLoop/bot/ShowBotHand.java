@@ -2,12 +2,12 @@ package pointSalad.gameLoop.bot;
 
 import player.IPlayer;
 import pointSalad.gameLoop.IShowHand;
-import pointSalad.setup.ISetup;
+import pointSalad.state.IState;
 
 public class ShowBotHand implements IShowHand{
-	ISetup newSaladSetup;
+	IState newSaladSetup;
 
-    public ShowBotHand(ISetup newSaladSetup) {
+    public ShowBotHand(IState newSaladSetup) {
         this.newSaladSetup = newSaladSetup;
     }
 

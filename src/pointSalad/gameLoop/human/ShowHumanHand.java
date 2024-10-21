@@ -2,13 +2,13 @@ package pointSalad.gameLoop.human;
 
 import player.IPlayer;
 import pointSalad.gameLoop.IShowHand;
-import pointSalad.setup.ISetup;
+import pointSalad.state.IState;
 
 public class ShowHumanHand implements IShowHand{
 	
-	ISetup newSaladSetup;
+	IState newSaladSetup;
 
-    public ShowHumanHand(ISetup newSaladSetup) {
+    public ShowHumanHand(IState newSaladSetup) {
         this.newSaladSetup = newSaladSetup;
     }
 

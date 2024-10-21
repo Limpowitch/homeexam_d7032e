@@ -25,7 +25,6 @@ public class VegetableTotalCalculator implements ICriteriaCalculator{
 	    boolean meetsCriteria = false;
 
 	    if (criteriaSegment.contains("MOST")) {
-	        // Assume the player has the most total vegetables until proven otherwise
 	        meetsCriteria = true;
 	        for (IPlayer p : players) {
 	            if (p.getPlayerID() != thisPlayer.getPlayerID()) { 
@@ -37,7 +36,6 @@ public class VegetableTotalCalculator implements ICriteriaCalculator{
 	            }
 	        }
 	    } else if (criteriaSegment.contains("FEWEST")) {
-	        // Assume the player has the fewest total vegetables until proven otherwise
 	        meetsCriteria = true;
 	        for (IPlayer p : players) {
 	            if (p.getPlayerID() != thisPlayer.getPlayerID()) { 
@@ -60,7 +58,6 @@ public class VegetableTotalCalculator implements ICriteriaCalculator{
 	            System.out.println("Invalid points value in criteria: " + criteriaSegment);
 	        }
 	    }
-        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
 	    return score;
 	}
 }

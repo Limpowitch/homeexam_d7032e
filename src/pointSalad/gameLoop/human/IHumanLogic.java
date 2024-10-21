@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import card.ICard;
 import player.IPlayer;
 
+/**
+ * Interface for human player logic
+ */
 public interface IHumanLogic {
 
 	public void humanLogicLoop(IPlayer thisPlayer);

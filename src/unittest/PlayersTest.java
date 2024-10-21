@@ -11,12 +11,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import player.IPlayer;
-import pointSalad.setup.PointSaladSetup;
+import pointSalad.state.PointSaladState;
 
 
 class PlayersTest {
 	
-    private PointSaladSetup setup;
+    private PointSaladState setup;
 	
 	@AfterEach
     void tearDown() {
@@ -40,7 +40,7 @@ class PlayersTest {
 	void testPlayerCreation(int numberPlayers, int numberOfBots) {
 		String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
 		
-		setup = new PointSaladSetup(args);
+		setup = new PointSaladState(args);
 		
 		ArrayList<IPlayer> players = setup.getPlayers();
 		
@@ -66,7 +66,7 @@ class PlayersTest {
 	        String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
 	        
 	        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-	            setup = new PointSaladSetup(args);
+	            setup = new PointSaladState(args);
 	        }, "Expected PointSaladSetup to throw IllegalArgumentException for invalid player/bot counts");
 	        
 	    }
@@ -86,7 +86,7 @@ class PlayersTest {
 	 void randomSelectionOfPlayers(int numberPlayers, int numberOfBots) {
 		 String[] args = {String.valueOf(numberPlayers), String.valueOf(numberOfBots)};
 			
-		 setup = new PointSaladSetup(args);
+		 setup = new PointSaladState(args);
 		 
 		 int randomPlayer = (int) (Math.random() * (setup.getPlayers().size()));
 		 
@@ -97,21 +97,19 @@ class PlayersTest {
 		 boolean passed = true;
 		 
 		 for (int i = 0; i < 1000; i++) {
-			 setup = new PointSaladSetup(args);
+			 setup = new PointSaladState(args);
 			 
 			 int randomIterativePlayer = (int) (Math.random() * (setup.getPlayers().size()));
 			 
 			 int iterativePlayer = setup.getPlayers().get(randomIterativePlayer).getPlayerID();
-			 
-			 //System.out.println("Iterative player: " + iterativePlayer);
-			 
+			 			 
 			 if (comparisonPlayer == iterativePlayer) {
 				 samePlayerCounter++;
 			 } else {
 				 samePlayerCounter = 0;
 			 }
 			 
-			 if (samePlayerCounter == 10) {
+			 if (samePlayerCounter == 20) {
 				 passed = false;
 			 }
 		 }

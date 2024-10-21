@@ -3,9 +3,9 @@ package view;
 import java.util.ArrayList;
 
 import card.ICard;
-import card.Vegetable;
 import counter.ICounter;
 import pile.IPile;
+import pointSalad.state.VegetableTypes;
 
 public class PointSalladView implements IView {
 	private ICounter vegetableCounter;
@@ -23,8 +23,7 @@ public class PointSalladView implements IView {
 			}
 		}
 		handString += "\nVegetables:\t";
-		//Sum up the number of each vegetable and show the total number of each vegetable
-		for (Vegetable vegetable : Vegetable.values()) {
+		for (VegetableTypes vegetable : VegetableTypes.values()) {
 			int count = vegetableCounter.countVegetables(hand, vegetable);
 			if(count > 0) {
 				handString += vegetable + ": " + count + "\t";

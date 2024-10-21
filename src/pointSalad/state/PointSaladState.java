@@ -1,4 +1,4 @@
-package pointSalad.setup;
+package pointSalad.state;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -35,38 +35,35 @@ import score.parser.ICriteriaParser;
 import view.IView;
 import view.PointSalladView;
 
-public class PointSaladSetup implements ISetup, AutoCloseable{
+public class PointSaladState implements IState, AutoCloseable{
 	int numberPlayers = 0;
 	int numberOfBots = 0;
-	public ArrayList<IPlayer> players = new ArrayList<>();
-	public ArrayList<IPile> piles = new ArrayList<>();
-    public ServerSocket aSocket;
+	private ArrayList<IPlayer> players = new ArrayList<>();
+	private ArrayList<IPile> piles = new ArrayList<>();
+    private ServerSocket aSocket;
 	String[] terminalInput;
-	private int currentPlayer;
+	
 	
 	private ICounter vegetableCounter;
     private ICriteriaParser vegetableCriteriaParser;
-    private ArrayList<ICriteriaCalculator> calculators;
+    private ArrayList<ICriteriaCalculator> calculators; //Generic arraylist for holding calculators
     private ICriteriaCalculatorFactory vegetableCriteriaFactory;
     private IScoreCalculator scoreCalculator;
     private IPileInitializer setVegetablePile;
     private IView pointSalladView;
     private INetwork pointSalladNetwork;
-    
-    
 	
-	public PointSaladSetup(String[] terminalInput) {
+	public PointSaladState(String[] terminalInput) {
 		this.terminalInput = terminalInput;
 		gameInitializer();
 		initializePlayers();
 	}
 
-	public void gameInitializer() {
+	private void gameInitializer() {
 		this.vegetableCounter = new VegetableCounter();
 	    this.vegetableCriteriaParser = new CriteriaParser();
 	    this.calculators = new ArrayList<>();
 
-		// Add calculators to the list in order of specificity
 		calculators.add(new VegetableParityCalculator(vegetableCounter));
 		calculators.add(new VegetableTypeCalculator(vegetableCounter));
 		calculators.add(new VegetableFewestCalculator(vegetableCounter));
@@ -83,7 +80,7 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
 	    this.pointSalladNetwork = new PointSaladNetwork();
 	}
 	
-    public void initializePlayers() {
+    private void initializePlayers() {
     	parseTerminalInput();
     	
     	if (numberPlayers < 0 || numberPlayers > 6) {
@@ -101,34 +98,26 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
         
     	
 		if(numberPlayers > 1) {
-			//System.out.println("ENTERED ONLINE");
 			IInitializeOnlinePlayers newOnlinePlayers = new InitializeOnlinePlayers(pointSalladNetwork);
 			try {
 				newOnlinePlayers.initializePlayers(numberPlayers, numberOfBots, players);
 				this.aSocket = newOnlinePlayers.getSocket();
-				//System.out.println(players);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
 		} else {
-			//System.out.println("ENTERED OFFLINE");
 			IInitializeOfflinePlayers newOfflinePlayers = new InitializeOfflinePlayers();
 			try {
 				this.players = newOfflinePlayers.initializePlayers(numberPlayers, numberOfBots, players);
-				//System.out.println(players);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		
-		this.currentPlayer = (int) (Math.random() * (getPlayers().size()));
-
 	}
     
-    public void parseTerminalInput() {
+    private void parseTerminalInput() {
     	if(terminalInput.length == 0) {
 			System.out.println("Please enter the number of players (1-6): ");
 			Scanner in = new Scanner(System.in);
@@ -137,7 +126,6 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
 			numberOfBots = in.nextInt();
 		
 		} else if(terminalInput[0].matches("\\d+")){
-			//check if args[0] is a String (ip address) or an integer (number of players)
 			numberPlayers = Integer.parseInt(terminalInput[0]);
 			numberOfBots = Integer.parseInt(terminalInput[1]); 
 			
@@ -152,7 +140,6 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
 		try {
 			setVegetablePile.setPiles(numberPlayers+numberOfBots, piles);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }
@@ -212,7 +199,7 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
                 e.printStackTrace();
             }
         } else {
-            //System.out.println("No ServerSocket to close or it is already closed.");
+            System.out.println("No ServerSocket to close or it is already closed.");
         }
     }
 

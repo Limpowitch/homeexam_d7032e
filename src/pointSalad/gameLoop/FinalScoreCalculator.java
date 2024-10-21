@@ -1,27 +1,27 @@
 package pointSalad.gameLoop;
 
 import player.IPlayer;
-import pointSalad.setup.ISetup;
+import pointSalad.state.IState;
 
 public class FinalScoreCalculator implements IFinalScore{
-	ISetup newSaladSetup;
+	IState saladState;
 	int maxScore;
 	
-	public FinalScoreCalculator(ISetup newSaladSetup) {
-		this.newSaladSetup = newSaladSetup;
+	public FinalScoreCalculator(IState saladState) {
+		this.saladState = saladState;
 	}
 	
 	public void printFinalScore() {
-		newSaladSetup.getNetwork().sendToAllPlayers(("\n-------------------------------------- CALCULATING SCORES --------------------------------------\n"), newSaladSetup.getPlayers());
-		for(IPlayer player : newSaladSetup.getPlayers()) {
-			newSaladSetup.getNetwork().sendToAllPlayers("Player " + player.getPlayerID() + "'s hand is: \n"+newSaladSetup.getView().displayHand(player.getHand()), newSaladSetup.getPlayers());
-			player.setScore(newSaladSetup.getScoreCalculator().calculateScore(player.getHand(), player, newSaladSetup.getPlayers())); 
-			newSaladSetup.getNetwork().sendToAllPlayers("\nPlayer " + player.getPlayerID() + "'s score is: " + player.getScore(), newSaladSetup.getPlayers());
+		saladState.getNetwork().sendToAllPlayers(("\n-------------------------------------- CALCULATING SCORES --------------------------------------\n"), saladState.getPlayers());
+		for(IPlayer player : saladState.getPlayers()) {
+			saladState.getNetwork().sendToAllPlayers("Player " + player.getPlayerID() + "'s hand is: \n"+saladState.getView().displayHand(player.getHand()), saladState.getPlayers());
+			player.setScore(saladState.getScoreCalculator().calculateScore(player.getHand(), player, saladState.getPlayers())); 
+			saladState.getNetwork().sendToAllPlayers("\nPlayer " + player.getPlayerID() + "'s score is: " + player.getScore(), saladState.getPlayers());
 		}
 
 		int maxScore = 0;
 		int playerID = 0;
-		for(IPlayer player : newSaladSetup.getPlayers()) {
+		for(IPlayer player : saladState.getPlayers()) {
 			System.out.println("SCORE FOR PLAYER " + player.getPlayerID() + " INSIDE OF FINALSCORECALCULATOR: " + player.getScore());
 			if(player.getScore() > maxScore) {
 				maxScore = player.getScore();
@@ -29,7 +29,7 @@ public class FinalScoreCalculator implements IFinalScore{
 			}
 		}
 		this.maxScore = maxScore;
-		for(IPlayer player : newSaladSetup.getPlayers()) {
+		for(IPlayer player : saladState.getPlayers()) {
 			if(player.getPlayerID() == playerID) {
 				player.sendMessage("\nCongratulations! You are the winner with a score of " + maxScore);
 			} else {

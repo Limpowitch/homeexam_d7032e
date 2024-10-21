@@ -16,10 +16,9 @@ public class InitializeOnlinePlayers implements IInitializeOnlinePlayers{
 
 	public ArrayList<IPlayer> initializePlayers(int numberPlayers, int numberOfBots, ArrayList<IPlayer> players) throws Exception{
 		
-		players.add(new OnlineHuman(0, null, null, null, false, false)); //add this instance as a player
-        //Open for connections if there are online players
+		players.add(new OnlineHuman(0, null, null, null, false, false)); 
         for(int i=0; i<numberOfBots; i++) {
-            players.add(new OnlineBot(i+1, null, null, null, true, false)); //add a bot    
+            players.add(new OnlineBot(i+1, null, null, null, true, false));     
         }
         
         this.serverSocket = pointSalladNetwork.server(numberPlayers, numberOfBots, players);

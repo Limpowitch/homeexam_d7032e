@@ -9,16 +9,16 @@ import java.util.Scanner;
 import player.IPlayer;
 
 public class OnlineHuman extends AbstractOnline {
-	public Socket connection;
+	private Socket connection;
 	public ArrayList<String> region = new ArrayList<String>();
 	
 	public OnlineHuman(int playerID, Socket connection , ObjectInputStream inFromClient, ObjectOutputStream outToClient, boolean isBot, boolean online) {
-		this.playerID = playerID; 
+		super(playerID,  inFromClient,  outToClient,  isBot,  online);
 		this.connection = connection; 
-		this.inFromClient = inFromClient; 
-		this.outToClient = outToClient; 
-		this.isBot = isBot;
-		this.online = online;
+	}
+	
+	public Socket getConnection() {
+		return this.connection;
 	}
 } 
 
