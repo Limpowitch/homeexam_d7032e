@@ -27,7 +27,7 @@ public class VegetableParityCalculator implements ICriteriaCalculator {
 		int countVeg = vegetableCounter.countVegetables(hand, Vegetable.valueOf(veg));
 		//System.out.print("ID3: "+((countVeg%2==0)?7:3) + " ");
 		score += (countVeg%2==0)?7:3;
-        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
+        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
 		return score;
     }
 }

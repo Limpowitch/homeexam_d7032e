@@ -60,7 +60,7 @@ public class VegetableTotalCalculator implements ICriteriaCalculator{
 	            System.out.println("Invalid points value in criteria: " + criteriaSegment);
 	        }
 	    }
-        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
+        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
 	    return score;
 	}
 }

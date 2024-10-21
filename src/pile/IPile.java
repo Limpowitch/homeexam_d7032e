@@ -21,4 +21,5 @@ public interface IPile {
 	ICard drawCard();
 
 	int size();
+	
 }

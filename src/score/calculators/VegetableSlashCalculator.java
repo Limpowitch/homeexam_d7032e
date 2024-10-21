@@ -55,7 +55,7 @@ public class VegetableSlashCalculator implements ICriteriaCalculator{
 	        }
 	    }
 	    
-	    System.out.print("RETURNED SCORE FROM " + criteriaSegment + " EQUALS= " + score + " ");
+	    //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " EQUALS= " + score + " ");
 	    return score;
 	}
 

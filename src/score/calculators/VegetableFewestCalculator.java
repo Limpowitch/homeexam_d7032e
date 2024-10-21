@@ -43,7 +43,7 @@ public class VegetableFewestCalculator implements ICriteriaCalculator{
             score += Integer.parseInt(criteriaSegment.substring(criteriaSegment.indexOf("=") + 1).trim());
         }
         
-        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
+        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
         return score;
     }
 }

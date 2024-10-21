@@ -40,7 +40,7 @@ public class VegetableMostCalculator implements ICriteriaCalculator {
 			//System.out.print("ID1/ID2: "+Integer.parseInt(criteria.substring(criteria.indexOf("=")+1).trim()) + " ");
 			score += Integer.parseInt(criteriaSegment.substring(criteriaSegment.indexOf("=")+1).trim());
 		}
-        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
+        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
 		return score;
 		
     }

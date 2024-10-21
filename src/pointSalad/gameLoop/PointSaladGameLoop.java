@@ -1,10 +1,11 @@
 package pointSalad.gameLoop;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-
 import pile.IPile;
 import player.IPlayer;
+import pointSalad.gameLoop.bot.IBotLogic;
+import pointSalad.gameLoop.bot.PointSaladBotLogic;
+import pointSalad.gameLoop.human.IHumanLogic;
+import pointSalad.gameLoop.human.PointSaladHumanLogic;
 import pointSalad.setup.ISetup;
 
 public class PointSaladGameLoop implements IGameLoop{
@@ -15,7 +16,9 @@ public class PointSaladGameLoop implements IGameLoop{
 	}
 	
 	public void gameLoop() {
-		// Set random starting player
+				// Set random starting player
+		
+				System.out.println("Entered gameloop");
 				int currentPlayer = (int) (Math.random() * (newSaladSetup.getPlayers().size()));
 				boolean keepPlaying = true;
 				IHumanLogic humanLogic = new PointSaladHumanLogic(newSaladSetup);
@@ -43,6 +46,8 @@ public class PointSaladGameLoop implements IGameLoop{
 						botLogic.botLogicLoop(thisPlayer);
 					}
 					
+					
+					
 					if(currentPlayer == newSaladSetup.getPlayers().size()-1) {
 						currentPlayer = 0;
 					} else {
@@ -54,5 +59,7 @@ public class PointSaladGameLoop implements IGameLoop{
 				
 				//newSaladSetup.close();
 
-			}
 	}
+	
+	
+}

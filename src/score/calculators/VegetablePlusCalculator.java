@@ -77,13 +77,13 @@ public class VegetablePlusCalculator implements ICriteriaCalculator{
 
             if (conditionMet) {
                 totalScore += requiredPoints;
-                System.out.println("Condition met for: " + component + ". Awarded: " + requiredPoints + " points.");
+                //System.out.println("Condition met for: " + component + ". Awarded: " + requiredPoints + " points.");
             } else {
-                System.out.println("Condition NOT met for: " + component + ". No points awarded.");
+                //System.out.println("Condition NOT met for: " + component + ". No points awarded.");
             }
         }
 
-        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " EQUALS= " + totalScore + " ");
+        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " EQUALS= " + totalScore + " ");
         return totalScore;
     }
 }

@@ -85,7 +85,7 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
     public void initializePlayers() {
     	parseTerminalInput();
     	
-    	if (numberPlayers < 1 || numberPlayers > 6) {
+    	if (numberPlayers < 0 || numberPlayers > 6) {
             throw new IllegalArgumentException("Invalid number of players: " + numberPlayers + ". Must be between 2 and 6.");
         }
     	
@@ -211,7 +211,7 @@ public class PointSaladSetup implements ISetup, AutoCloseable{
                 e.printStackTrace();
             }
         } else {
-            System.out.println("No ServerSocket to close or it is already closed.");
+            //System.out.println("No ServerSocket to close or it is already closed.");
         }
     }
 

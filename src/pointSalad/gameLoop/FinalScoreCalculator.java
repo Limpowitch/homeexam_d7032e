@@ -5,6 +5,7 @@ import pointSalad.setup.ISetup;
 
 public class FinalScoreCalculator implements IFinalScore{
 	ISetup newSaladSetup;
+	int maxScore;
 	
 	public FinalScoreCalculator(ISetup newSaladSetup) {
 		this.newSaladSetup = newSaladSetup;
@@ -21,11 +22,13 @@ public class FinalScoreCalculator implements IFinalScore{
 		int maxScore = 0;
 		int playerID = 0;
 		for(IPlayer player : newSaladSetup.getPlayers()) {
+			System.out.println("SCORE FOR PLAYER " + player.getPlayerID() + " INSIDE OF FINALSCORECALCULATOR: " + player.getScore());
 			if(player.getScore() > maxScore) {
 				maxScore = player.getScore();
 				playerID = player.getPlayerID();
 			}
 		}
+		this.maxScore = maxScore;
 		for(IPlayer player : newSaladSetup.getPlayers()) {
 			if(player.getPlayerID() == playerID) {
 				player.sendMessage("\nCongratulations! You are the winner with a score of " + maxScore);
@@ -34,6 +37,10 @@ public class FinalScoreCalculator implements IFinalScore{
 			}
 		}
 		
+	}
+	
+	public int getMaxScore() {
+		return this.maxScore;
 	}
 
 }

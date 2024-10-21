@@ -50,7 +50,7 @@ public class VegetableTypeCalculator implements ICriteriaCalculator {
 			score += totalType * points;
         }
         
-        System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
+        //System.out.print("RETURNED SCORE FROM " + criteriaSegment + " " + "EQUALS= " + score + " ");
     	return score;
 
     }
